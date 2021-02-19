@@ -23,7 +23,7 @@ class Player {
     div.style.left = window.innerWidth - this.width;
 
     this.div = div;
-    document.body.prepend(this.div);
+    document.body.append(this.div);
   }
 
   update() {
@@ -41,5 +41,31 @@ class Player {
     if (this.jumping) return;
     this.jumping = true;
     this.yv -= 20;
+  }
+
+  /**
+   * @returns {Number} hotizontal center point of a player
+   */
+  get cx() {
+    return this.x + this.width / 2;
+  }
+  /**
+   * @returns {Number} vertical center point of a player
+   */
+  get cy() {
+    return this.y + this.height / 2;
+  }
+
+  get bottom() {
+    return this.y + this.height;
+  }
+  get top() {
+    return this.y;
+  }
+  get left() {
+    return this.x;
+  }
+  get right() {
+    return this.x + this.width;
   }
 }

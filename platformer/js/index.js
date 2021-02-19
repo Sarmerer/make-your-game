@@ -1,12 +1,17 @@
-let game, contoller;
+let display, game, world, player, contoller;
 
 window.onload = function () {
+  display = new Display();
   game = new Game(window.innerHeight, window.innerWidth);
+  world = game.world;
+  player = world.player;
   controller = new Controller();
+
+  world.draw();
 
   window.addEventListener("keydown", listenKey);
   window.addEventListener("keyup", listenKey);
-  window.requestAnimationFrame(loop); // setInterval(loop, 1000 / 60);
+  window.requestAnimationFrame(loop); // setInterval(loop, 1000 / 5);
 };
 
 function px(n) {
@@ -18,23 +23,37 @@ function listenKey(e) {
 }
 
 function render() {
-  game.world.player.div.style.top = px(game.world.player.y);
-  game.world.player.div.style.left = px(game.world.player.x);
+  player.div.style.top = px(game.world.player.y);
+  player.div.style.left = px(game.world.player.x);
 }
 
 function loop() {
+  resize();
+
   if (controller.up.active) {
-    game.world.player.jump();
+    player.jump();
   }
 
   if (controller.left.active) {
-    game.world.player.goLeft();
+    player.goLeft();
   }
   if (controller.right.active) {
-    game.world.player.goRight();
+    player.goRight();
   }
 
   game.update();
   render();
   window.requestAnimationFrame(this.loop);
+}
+
+function resize() {
+  display.resize(
+    document.documentElement.clientWidth,
+    document.documentElement.clientHeight,
+    game.world.height / game.world.width
+  );
+  if (display.scaleChanged) {
+    display.scaleChanged = false;
+    world.rescale(display.xScale, display.yScale);
+  }
 }

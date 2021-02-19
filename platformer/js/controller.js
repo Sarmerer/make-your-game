@@ -1,34 +1,32 @@
+const keyBindings = [
+  { action: "left", triggers: ["ArrowLeft", "a"] },
+  { action: "right", triggers: ["ArrowRight", "d"] },
+  { action: "up", triggers: ["ArrowUp", "w", " "] },
+  { action: "die", triggers: ["f"] },
+];
+
 class Controller {
   constructor() {
-    this.left = new Controller.Input();
-    this.right = new Controller.Input();
-    this.up = new Controller.Input();
-
-    this.keys = [
-      { v: this.left, triggers: ["ArrowLeft", "a"] },
-      { v: this.right, triggers: ["ArrowRight", "d"] },
-      { v: this.up, triggers: ["ArrowUp", "w", " "] },
-    ];
+    keyBindings.forEach((key) => {
+      this[key.action] = new Controller.Input();
+    });
   }
 
   onKeyPress(event) {
     let state = event.type === "keydown" ? true : false;
-    let key = this.keys.find((k) => k.triggers.includes(event.key));
-    if (key) key.v.setState(state);
+    let key = keyBindings.find((k) => k.triggers.includes(event.key));
+    if (key) this[key.action].setState(state);
   }
 }
 
-Controller.Input = function () {
-  this.active = false;
-};
-
-Controller.Input.prototype = {
-  constructor: Controller.Input,
-
+Controller.Input = class {
+  constructor() {
+    this.active = false;
+  }
   /**
-   * @param {Boolean} state - New state
+   * @param {Boolean} state - New key state
    */
-  setState: function (state) {
+  setState(state) {
     this.active = state;
-  },
+  }
 };
