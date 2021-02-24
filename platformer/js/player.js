@@ -14,16 +14,18 @@ class Player {
     this.width = width;
     this.height = height;
 
-    let div = document.createElement("div");
-    div.style.position = "absolute";
-    div.style.width = px(this.width);
-    div.style.height = px(this.height);
-    div.style.background = "white";
-    div.style.top = window.innerHeight - this.height;
-    div.style.left = window.innerWidth - this.width;
-
-    this.div = div;
-    document.body.append(this.div);
+    this.div = NewHTMLElement("div", {
+      id: "player",
+      style: {
+        position: "absolute",
+        width: px(this.width),
+        height: px(this.height),
+        "background-color": "white",
+        top: px(this.y),
+        left: px(this.x),
+      },
+    });
+    document.body.appendChild(this.div); //document.getElementById("canvas").appendChild(this.div);
   }
 
   update() {

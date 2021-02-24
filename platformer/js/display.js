@@ -1,47 +1,43 @@
 class Display {
   constructor() {
-    this.initialWidth = document.documentElement.clientWidth;
-    this.initialHeight = document.documentElement.clientHeight;
-    this.xScale = 1.0;
-    this.yScale = 1.0;
-    this.scaleChanged = false;
+    this.nativeWidth = 1280;
+    this.nativeHeight = 720;
+    this.aspectRatio = this.nativeWidth / this.nativeHeight;
 
-    this.buffer = document.createElement("div");
-    this.buffer.id = "canvas";
-    this.buffer.style.width = px(this.initialWidth);
-    this.buffer.style.height = px(this.initialHeight);
+    this.width = this.nativeWidth;
+    this.height = this.nativeHeight;
+    this.scale = 1.0;
+    this.prevScale = 1.0;
 
-    document.body.appendChild(this.buffer);
+    this.buffer = NewHTMLElement("div", {
+      id: "canvas",
+      style: {
+        width: px(this.width),
+        height: px(this.height),
+        position: "absolute",
+      },
+    });
+
+    document.body.prepend(this.buffer);
   }
 
-  resize(width, height, whr) {
-    let newWidth, newHeight;
-    if (height / width > whr) {
-      newWidth = width * whr;
-      newHeight = width;
+  resize() {
+    let deviceWidth = document.documentElement.clientWidth;
+    let deviceHeight = document.documentElement.clientHeight;
+    let deviceAspectRatio = deviceWidth / deviceHeight;
+
+    if (deviceAspectRatio < this.aspectRatio) {
+      this.height = deviceWidth / this.aspectRatio;
+      this.width = deviceWidth;
     } else {
-      newWidth = height;
-      newHeight = height / whr;
+      this.height = deviceHeight;
+      this.width = deviceHeight * this.aspectRatio;
     }
-    this.buffer.style.height = px(newWidth);
-    this.buffer.style.width = px(newHeight);
-    let newX = width / this.initialWidth;
-    let newY = height / this.initialHeight;
 
-    if (newX != this.xScale) {
-      this.xScale = newX;
-      this.scaleChanged = true;
-    }
-    if (newY != this.yScale) {
-      this.yScale = newY;
-      this.scaleChanged = true;
-    }
-  }
+    this.prevScale = this.scale;
+    this.scale = deviceAspectRatio / this.aspectRatio;
 
-  get width() {
-    return this.buffer.style.width;
-  }
-  get height() {
-    return this.buffer.style.height;
+    this.buffer.style.width = px(this.width);
+    this.buffer.style.height = px(this.height);
   }
 }

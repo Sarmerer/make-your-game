@@ -3,27 +3,25 @@ class Game {
    * @param {Number} height - world height
    * @param {Number} width - world - width
    */
-  constructor(height = 500, width = 500) {
+  constructor(width = 500, height = 500) {
     this.world = {
       height: height,
       width: width,
       gravity: 1.5,
       friction: 0.9,
 
-      player: new Player(0, 0, 20, 20),
-      tileset: new TileSet("../assets/sheet.png", 490, 490, 70, 70),
+      player: new Player(500, 50, 40, 40),
+      tileset: new ColorSet(),
       map: [
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
       ],
       colliders: [],
       tiles: [],
@@ -34,31 +32,16 @@ class Game {
         });
       },
 
-      rescale(xScale, yScale) {
-        //this.rescaleMap(xScale, yScale);
-        this.rescaleColliders(xScale, yScale);
+      rescale(scale) {
+        this.rescaleColliders(scale);
       },
-      /**
-       * @param {Number} xScale - new X scale
-       * @param {Number} yScale - new Y scale
-       */
-      rescaleColliders(xScale, yScale) {
+      rescaleColliders(scale) {
         this.colliders.forEach((coll) => {
-          coll.width = coll.initialWidth * xScale;
-          coll.height = coll.initialHeight * yScale;
+          coll.width = coll.initialWidth * scale;
+          coll.height = coll.initialHeight * scale;
         });
       },
-      /**
-       * @param {Number} xScale - new X scale
-       * @param {Number} yScale - new Y scale
-       */
-      rescaleMap(xScale, yScale) {
-        this.tiles.forEach((tile) => {
-          if (!tile.style) return;
-          //tile.style.transform = `scale(${xScale}, ${yScale})`;
-          tile.style.width = px(tile.initialWidth * xScale);
-        });
-      },
+
       draw: function () {
         let canvas = document.getElementById("canvas");
 
@@ -67,8 +50,8 @@ class Game {
         this.tiles.push(world);
 
         for (let i = 0; i < this.map.length; i++) {
-          let width = 70; // window.innerWidth / this.map[i].length;
-          let height = 70; //window.innerHeight / this.map.length;
+          let width = 80;
+          let height = 80;
           for (let j = 0; j < this.map[i].length; j++) {
             let block = this.map[i][j];
             let div = this.tileset.tiledDiv(
@@ -76,20 +59,33 @@ class Game {
               height,
               this.tileset.adapter(block)
             );
-            div.style.top = px(height * i);
             div.style.left = px(width * j);
+            div.style.top = px(height * i);
             div.style.position = "absolute";
             this.tiles.push(div);
-            if (block)
-              this.colliders.push(
-                new Game.Collider.RectOuter(
-                  width * j,
-                  height * i,
-                  width,
-                  height
-                )
+            let colliderDiv, collider;
+            if (block !== 0) {
+              collider = new Game.Collider.RectOuter(
+                width * j,
+                height * i,
+                width,
+                height
               );
+              this.colliders.push(collider);
+              colliderDiv = NewHTMLElement("div", {
+                style: {
+                  position: "absolute",
+                  width: px(width),
+                  height: px(height),
+                  top: px(height * i),
+                  left: px(width * j),
+                  "box-sizing": "border-box",
+                  border: "4px solid blue",
+                },
+              });
+            }
             canvas.appendChild(div);
+            if (colliderDiv) canvas.appendChild(colliderDiv);
           }
         }
       },

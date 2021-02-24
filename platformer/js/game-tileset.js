@@ -31,10 +31,12 @@ class TileSet {
   tiledDiv(divWidth, divHeight, tileIndex) {
     let tile = document.createElement("div");
     tile.initialWidth = divWidth;
-    tile.initilHeight = divHeight;
+    tile.initialHeight = divHeight;
     tile.style.width = px(divWidth);
     tile.style.height = px(divHeight);
+    tile.style.backgroundSize = `${this.sheetWidth}px ${this.sheetHeight}[x]`;
     tile.style.backgroundImage = `url(../assets/sheet.png)`;
+    tile.style.backgroundRepeat = "norepeat";
     tile.style.backgroundPosition = this.disposition(tileIndex);
     return tile;
   }
