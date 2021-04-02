@@ -1,14 +1,14 @@
 class Entity {
   constructor(
-    x = BLOCK_WIDTH * 3,
-    y = BLOCK_WIDTH * 3,
+    x = BLOCK_WIDTH,
+    y = BLOCK_WIDTH,
     width = BLOCK_WIDTH,
     height = BLOCK_HEIGHT
   ) {
     this._x = x;
     this._y = y;
-    this._xv = 0;
-    this._yv = 0;
+    this._xVel = 0;
+    this._yVel = 0;
     this._width = width;
     this._height = height;
   }
@@ -20,10 +20,10 @@ class Entity {
     return this._y;
   }
   get xv() {
-    return this._xv;
+    return this._xVel;
   }
   get yv() {
-    return this._yv;
+    return this._yVel;
   }
   get top() {
     return this._x;
@@ -37,13 +37,13 @@ class Entity {
   get left() {
     return this._y;
   }
-  get virtualX() {
-    return this._xv > 0
+  get xVirt() {
+    return this._xVel > 0
       ? Math.floor(this._x / BLOCK_WIDTH)
       : Math.ceil(this._x / BLOCK_WIDTH);
   }
-  get virtualY() {
-    return this._yv > 0
+  get yVirt() {
+    return this._yVel > 0
       ? Math.floor(this._y / BLOCK_HEIGHT)
       : Math.ceil(this._y / BLOCK_HEIGHT);
   }
@@ -55,9 +55,9 @@ class Entity {
     this._y = value;
   }
   set xv(value) {
-    this._xv = value;
+    this._xVel = value;
   }
   set yv(value) {
-    this._yv = value;
+    this._yVel = value;
   }
 }

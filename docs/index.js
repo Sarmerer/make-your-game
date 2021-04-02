@@ -1,4 +1,15 @@
-let game, player, contoller;
+/**
+ * @type {Game}
+ */
+let game;
+/**
+ * @type {Player}
+ */
+let player;
+/**
+ * @type {Controller
+ */
+let controller;
 
 const BLOCK_WIDTH = 30;
 const BLOCK_HEIGHT = 30;
@@ -27,8 +38,9 @@ function px(n) {
  */
 function NewHTMLElement(elementType, props) {
   let el = document.createElement(elementType);
-  if (el && props) Object.assign(el, props);
-  if (el.style && props.style) Object.assign(el.style, props.style);
+  if (!el) return null;
+  if (props) Object.assign(el, props);
+  if (props?.style) Object.assign(el.style, props.style);
   return el;
 }
 
@@ -38,40 +50,23 @@ function listenKey(e) {
 
 function loop() {
   if (controller.up?.active || player.queue === "up") {
-    player.queue = "up";
-    if (
-      player.virtualY - 1 > 0 &&
-      !world.map[player.virtualY - 1][player.virtualX]
-    )
-      player.goUp();
+    if (game.playerCanGoUp()) player.goUp();
+    else player.queue = "up";
   }
 
   if (controller.down?.active || player.queue === "down") {
-    player.queue = "down";
-    if (
-      player.virtualY + 1 > 0 &&
-      !world.map[player.virtualY + 1][player.virtualX]
-    )
-      player.goDown();
+    if (game.playerCanGoDown()) player.goDown();
+    else player.queue = "down";
   }
 
   if (controller.left?.active || player.queue === "left") {
-    player.queue = "left";
-    if (
-      player.virtualX - 1 > 0 &&
-      !world.map[player.virtualY][player.virtualX - 1]
-    )
-      player.goLeft();
+    if (game.playerCanGoLeft()) player.goLeft();
+    else player.queue = "left";
   }
 
   if (controller.right?.active || player.queue === "right") {
-    player.queue = "right";
-
-    if (
-      player.virtualX + 1 < world.width &&
-      !world.map[player.virtualY][player.virtualX + 1]
-    )
-      player.goRight();
+    if (game.playerCanGoRight()) player.goRight();
+    else player.queue = "right";
   }
 
   game.update();

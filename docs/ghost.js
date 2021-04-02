@@ -27,20 +27,20 @@ class Ghost extends Entity {
     this._div.className = `walk-${directions[d]}`;
     switch (directions[d]) {
       case "left":
-        this._xv = -this._speed;
-        this._yv = 0;
+        this._xVel = -this._speed;
+        this._yVel = 0;
         break;
       case "right":
-        this._xv = this._speed;
-        this._yv = 0;
+        this._xVel = this._speed;
+        this._yVel = 0;
         break;
       case "up":
-        this._xv = 0;
-        this._yv = -this._speed;
+        this._xVel = 0;
+        this._yVel = -this._speed;
         break;
       case "down":
-        this._xv = 0;
-        this._yv = this._speed;
+        this._xVel = 0;
+        this._yVel = this._speed;
         break;
       default:
         break;

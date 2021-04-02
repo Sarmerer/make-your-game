@@ -7,6 +7,27 @@ body {
   background-color: black;
 }
 
+#game-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin-top: 5rem;
+}
+
+#canvas {
+  position: relative;
+}
+
+#score {
+  color: white;
+}
+
+.game-map {
+  display: grid;
+}
+
 #player {
   overflow: hidden;
   object-fit: contain;

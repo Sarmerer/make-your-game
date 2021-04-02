@@ -2,7 +2,7 @@ class Player extends Entity {
   constructor() {
     super();
     this._queue = null;
-    this._speed = 5;
+    this._speed = 3;
     this._div = NewHTMLElement("div", {
       id: "player",
       style: {
@@ -20,29 +20,29 @@ class Player extends Entity {
 
   goUp() {
     if (this._x % BLOCK_HEIGHT) return;
-    this._yv = -this._speed;
-    this._xv = 0;
+    this._yVel = -this._speed;
+    this._xVel = 0;
     this._queue = null;
     this._div.className = "animate walk-up";
   }
   goDown() {
     if (this._x % BLOCK_HEIGHT) return;
-    this._yv = this._speed;
-    this._xv = 0;
+    this._yVel = this._speed;
+    this._xVel = 0;
     this._queue = null;
     this._div.className = "animate walk-down";
   }
   goLeft() {
     if (this._y % BLOCK_WIDTH) return;
-    this._yv = 0;
-    this._xv = -this._speed;
+    this._yVel = 0;
+    this._xVel = -this._speed;
     this._queue = null;
     this._div.className = "animate walk-left";
   }
   goRight() {
     if (this._y % BLOCK_WIDTH) return;
-    this._yv = 0;
-    this._xv = this._speed;
+    this._yVel = 0;
+    this._xVel = this._speed;
     this._queue = null;
     this._div.className = "animate walk-right";
   }
