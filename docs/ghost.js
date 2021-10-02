@@ -1,8 +1,12 @@
-class Ghost extends Entity {
+import { NewHTMLElement } from "./utils.js";
+import { Actor } from "./actor.js";
+import { ghostSpeed } from "../config.js";
+
+export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost", color = "red") {
     super(x, y);
-    this._speed = 2;
-    this._lastDirection = null;
+    this._speed = ghostSpeed;
+    this._currentDirection = null;
     this._div = NewHTMLElement("div", {
       id: id,
       style: {
@@ -19,13 +23,12 @@ class Ghost extends Entity {
     this._div.appendChild(this._animation);
   }
 
-  move(directions) {
-    if (directions.left > 1 && directions.includes(this._lastDirection))
-      directions.splice(directions.indexOf(this._lastDirection), 1);
-    const d = Math.floor(Math.random() * directions.length);
-    this._lastDirection = directions[d];
-    this._div.className = `walk-${directions[d]}`;
-    switch (directions[d]) {
+  move(direction) {
+    if (this.isOppositeDirection(direction)) return;
+    this._currentDirection = direction;
+
+    this._div.className = `walk-${direction}`;
+    switch (direction) {
       case "left":
         this._xVel = -this._speed;
         this._yVel = 0;
@@ -43,11 +46,30 @@ class Ghost extends Entity {
         this._yVel = this._speed;
         break;
       default:
+        this._xVel = 0;
+        this._yVel = 0;
         break;
     }
   }
 
-  get div() {
-    return this._div;
+  stop() {
+    this._currentDirection = null;
+    this._xVel = 0;
+    this._yVel = 0;
+  }
+
+  get currentDirection() {
+    return this._currentDirection;
+  }
+
+  isOppositeDirection(direction) {
+    const opposite = {
+      left: "right",
+      right: "left",
+      up: "down",
+      down: "up",
+    };
+
+    return this._currentDirection == opposite[direction];
   }
 }

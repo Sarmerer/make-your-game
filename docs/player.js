@@ -1,8 +1,12 @@
-class Player extends Entity {
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+import { NewHTMLElement } from "./utils.js";
+import { Actor } from "./actor.js";
+import { playerSpeed } from "../config.js";
+
+export class Player extends Actor {
   constructor() {
     super();
-    this._queue = null;
-    this._speed = 3;
+    this._speed = playerSpeed;
     this._div = NewHTMLElement("div", {
       id: "player",
       style: {
@@ -18,44 +22,50 @@ class Player extends Entity {
     this._div.appendChild(this._animation);
   }
 
+  go(dir) {
+    switch (dir) {
+      case "up":
+        this.goUp();
+        break;
+      case "down":
+        this.goDown();
+        break;
+      case "left":
+        this.goLeft();
+        break;
+      case "right":
+        this.goRight();
+        break;
+    }
+  }
+
   goUp() {
     if (this._x % BLOCK_HEIGHT) return;
     this._yVel = -this._speed;
     this._xVel = 0;
-    this._queue = null;
     this._div.className = "animate walk-up";
   }
   goDown() {
     if (this._x % BLOCK_HEIGHT) return;
     this._yVel = this._speed;
     this._xVel = 0;
-    this._queue = null;
     this._div.className = "animate walk-down";
   }
   goLeft() {
     if (this._y % BLOCK_WIDTH) return;
     this._yVel = 0;
     this._xVel = -this._speed;
-    this._queue = null;
     this._div.className = "animate walk-left";
   }
   goRight() {
     if (this._y % BLOCK_WIDTH) return;
     this._yVel = 0;
     this._xVel = this._speed;
-    this._queue = null;
     this._div.className = "animate walk-right";
   }
 
-  get div() {
-    return this._div;
-  }
-
-  get queue() {
-    return this._queue;
-  }
-
-  set queue(value) {
-    this._queue = value;
+  draw() {
+    this.div.style.top = `${this.y}px`;
+    this.div.style.left = `${this.x}px`;
   }
 }

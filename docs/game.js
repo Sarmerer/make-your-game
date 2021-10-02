@@ -1,6 +1,14 @@
-class World {
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+import { Player } from "./player.js";
+import { Ghost } from "./ghost.js";
+import { Tile } from "./tile.js";
+
+import { NewHTMLElement, vectorMagnitude } from "./utils.js";
+
+import { TILES, EVENTS } from "./tile.js";
+
+export class World {
   constructor() {
-    this._tiles = new Map();
     // prettier-ignore
     this._map = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -12,7 +20,7 @@ class World {
       [1, 2, 2, 2, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1],
       [1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1],
       [0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0],
-      [0, 0, 0, 1, 2, 1, 2, 1, 0, 0, 0, 0, 1, 2, 1, 2, 1, 0, 0, 0],
+      [0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0],
       [1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1], 
       [1, 0, 0, 0, 2, 2, 2, 1, 0, 0, 0, 0, 1, 2, 2, 2, 0, 0, 0, 1], 
       [1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1], 
@@ -29,6 +37,8 @@ class World {
     ];
     this.width = this._map[0].length;
     this.height = this._map.length;
+
+    this._tiles = new Map();
   }
 
   get map() {
@@ -38,9 +48,28 @@ class World {
   get tiles() {
     return this._tiles;
   }
+
+  draw() {
+    const map = NewHTMLElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateRows: `repeat(${this.height}, 30px)`,
+        gridTemplateColumns: `repeat(${this.width}, 30px)`,
+      },
+    });
+    for (let y = 0; y < this.height; y++) {
+      const row = this.map[y];
+      for (let x = 0; x < row.length; x++) {
+        const tile = new Tile(this.map[y][x]);
+        map.appendChild(tile.div);
+        this.tiles.set(`${y}-${x}`, tile);
+      }
+    }
+    return map;
+  }
 }
 
-class Game {
+export class Game {
   constructor() {
     this._gameArea = document.getElementById("game-area");
     if (!this._gameArea) {
@@ -72,8 +101,9 @@ class Game {
 
     const colors = ["red", "grey", "cyan", "yellow"];
     const names = ["blinky", "pinky", "inky", "clyde"];
-    for (let i = 0; i < 4; i++) {
-      const g = new Ghost(30, 30, names[i], colors[i]);
+
+    for (let i = 0; i < names.length; i++) {
+      const g = new Ghost(30 + i * 150, 30 + i * 150, names[i], colors[i]);
       this._ghosts.push(g);
       this._canvas.appendChild(g.div);
     }
@@ -83,7 +113,6 @@ class Game {
     this.moveGhosts();
     this.movePlayer();
     this.draw();
-    // if (this.playerDead()) console.log("DEAD");
   }
 
   callEvent(event) {
@@ -93,13 +122,7 @@ class Game {
 
   updateScore() {
     this._score += this._scorePerFood;
-    this._scoreDiv.textContent = this._score;
-  }
-
-  playerDead() {
-    return this._ghosts
-      .map((g) => `${g.xVirt}-${g.yVirt}`)
-      .includes(`${this._player.xVirt}-${this._player.yVirt}`);
+    this._scoreDiv.textContent = `${this._score}`;
   }
 
   movePlayer() {
@@ -122,40 +145,81 @@ class Game {
   moveGhosts() {
     const self = this;
     for (const g of this._ghosts) {
-      move();
-      async function move() {
-        g.x += g.xv;
-        g.y += g.yv;
-        if (g.xv !== 0 && g.x % BLOCK_WIDTH) return;
-        if (g.yv !== 0 && g.y % BLOCK_HEIGHT) return;
-        const directions = [];
-        if (
-          g.yVirt - 1 > 0 &&
-          self._world.map[g.yVirt - 1][g.xVirt] !== TILES.WALL
-        )
-          directions.push("up");
-        if (
-          g.xVirt + 1 < self._world.height &&
-          self._world.map[g.yVirt + 1][g.xVirt] !== TILES.WALL
-        )
-          directions.push("down");
-        if (
-          g.xVirt - 1 > 0 &&
-          self._world.map[g.yVirt][g.xVirt - 1] !== TILES.WALL
-        )
-          directions.push("left");
-        if (
-          g.xVirt + 1 < self._world.width &&
-          self._world.map[g.yVirt][g.xVirt + 1] !== TILES.WALL
-        )
-          directions.push("right");
-        g.move(directions);
-      }
+      move(g);
+    }
+
+    async function move(ghost) {
+      ghost.x += ghost.xv;
+      ghost.y += ghost.yv;
+
+      if (ghost.xv !== 0 && ghost.x % BLOCK_WIDTH) return;
+      if (ghost.yv !== 0 && ghost.y % BLOCK_HEIGHT) return;
+
+      const availableDirections = ghostCanGo(ghost);
+
+      if (
+        ghost.currentDirection &&
+        !availableDirections.some((d) => d.direction == ghost.currentDirection)
+      )
+        return ghost.stop();
+
+      const dir = availableDirections.reduce(
+        (acc, dir) => {
+          const vMag = vectorMagnitude(
+            self._player.xVirt,
+            self._player.yVirt,
+            ghost.xVirt + (dir.x || 0),
+            ghost.yVirt + (dir.y || 0)
+          );
+
+          if (acc.length == null || vMag < acc.length) {
+            Object.assign(acc, {
+              length: vMag,
+              direction: dir.direction,
+            });
+          }
+
+          return acc;
+        },
+        { length: null }
+      );
+
+      const direction = dir.direction;
+
+      ghost.move(direction);
+    }
+
+    function ghostCanGo(ghost) {
+      const directions = [];
+      if (
+        ghost.yVirt - 1 > 0 &&
+        self._world.map[ghost.yVirt - 1][ghost.xVirt] !== TILES.WALL
+      )
+        directions.push({ y: -1, direction: "up" });
+
+      if (
+        ghost.yVirt + 1 < self._world.height &&
+        self._world.map[ghost.yVirt + 1][ghost.xVirt] !== TILES.WALL
+      )
+        directions.push({ y: 1, direction: "down" });
+      if (
+        ghost.xVirt - 1 > 0 &&
+        self._world.map[ghost.yVirt][ghost.xVirt - 1] !== TILES.WALL
+      )
+        directions.push({ x: -1, direction: "left" });
+      if (
+        ghost.xVirt + 1 < self._world.width &&
+        self._world.map[ghost.yVirt][ghost.xVirt + 1] !== TILES.WALL
+      )
+        directions.push({ x: 1, direction: "right" });
+      return directions;
     }
   }
 
   start() {
-    this.drawMap();
+    const map = this._world.draw();
+    this._canvas.append(map);
+
     this.draw();
   }
 
@@ -164,59 +228,51 @@ class Game {
     this.drawPlayer();
   }
 
-  drawMap() {
-    const map = NewHTMLElement("div", {
-      style: {
-        display: "grid",
-        gridTemplateRows: `repeat(${this._world.height}, 30px)`,
-        gridTemplateColumns: `repeat(${this._world.width}, 30px)`,
-      },
-    });
-    for (let y = 0; y < this._world.map.length; y++) {
-      const row = this._world.map[y];
-      for (let x = 0; x < row.length; x++) {
-        const tile = new Tile(this._world.map[y][x]);
-        map.appendChild(tile.div);
-        this._world.tiles.set(`${y}-${x}`, tile);
-      }
-    }
-    this._canvas.appendChild(map);
-  }
-
   drawGhosts() {
     for (const g of this._ghosts) {
-      g.div.style.top = `${g.y}px`;
-      g.div.style.left = `${g.x}px`;
+      g.draw();
     }
   }
 
   drawPlayer() {
-    this._player.div.style.top = `${this._player.y}px`;
-    this._player.div.style.left = `${this._player.x}px`;
+    this._player.draw();
+  }
+
+  playerCanGo(dir) {
+    switch (dir) {
+      case "up":
+        return this.playerCanGoUp();
+      case "down":
+        return this.playerCanGoDown();
+      case "left":
+        return this.playerCanGoLeft();
+      case "right":
+        return this.playerCanGoRight();
+    }
   }
 
   playerCanGoUp() {
     return (
-      player.yVirt - 1 >= 0 &&
-      world.map[player.yVirt - 1][player.xVirt] !== TILES.WALL
+      this._player.yVirt - 1 >= 0 &&
+      this._world.map[this._player.yVirt - 1][this._player.xVirt] !== TILES.WALL
     );
   }
   playerCanGoDown() {
     return (
-      player.yVirt + 1 < this._world.height &&
-      world.map[player.yVirt + 1][player.xVirt] !== TILES.WALL
+      this._player.yVirt + 1 < this._world.height &&
+      this._world.map[this._player.yVirt + 1][this._player.xVirt] !== TILES.WALL
     );
   }
   playerCanGoLeft() {
     return (
-      player.xVirt - 1 >= 0 &&
-      world.map[player.yVirt][player.xVirt - 1] !== TILES.WALL
+      this._player.xVirt - 1 >= 0 &&
+      this._world.map[this._player.yVirt][this._player.xVirt - 1] !== TILES.WALL
     );
   }
   playerCanGoRight() {
     return (
-      player.xVirt + 1 < this._world.width &&
-      world.map[player.yVirt][player.xVirt + 1] !== TILES.WALL
+      this._player.xVirt + 1 < this._world.width &&
+      this._world.map[this._player.yVirt][this._player.xVirt + 1] !== TILES.WALL
     );
   }
 

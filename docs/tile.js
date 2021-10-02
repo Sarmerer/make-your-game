@@ -1,4 +1,7 @@
-const TILES = {
+import { NewHTMLElement } from "./utils.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+
+export const TILES = {
   FLOOR: 0,
   WALL: 1,
   FOOD: 2,
@@ -12,12 +15,12 @@ const TILES = {
   },
 };
 
-const EVENTS = {
+export const EVENTS = {
   ATE_FOOD: "ate-food",
   ATE_PILL: "ate-pill",
 };
 
-class Tile {
+export class Tile {
   constructor(type = TILES.FLOOR) {
     this._type = TILES.getKey(type);
     this.onCollide = null;

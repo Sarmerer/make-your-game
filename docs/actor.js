@@ -1,4 +1,6 @@
-class Entity {
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+
+export class Actor {
   constructor(
     x = BLOCK_WIDTH,
     y = BLOCK_WIDTH,
@@ -11,6 +13,13 @@ class Entity {
     this._yVel = 0;
     this._width = width;
     this._height = height;
+
+    this._div = null;
+  }
+
+  draw() {
+    this.div.style.top = `${this.y}px`;
+    this.div.style.left = `${this.x}px`;
   }
 
   get x() {
@@ -46,6 +55,10 @@ class Entity {
     return this._yVel > 0
       ? Math.floor(this._y / BLOCK_HEIGHT)
       : Math.ceil(this._y / BLOCK_HEIGHT);
+  }
+
+  get div() {
+    return this._div;
   }
 
   set x(value) {
