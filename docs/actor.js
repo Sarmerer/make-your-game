@@ -1,4 +1,4 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./config.js";
 
 export class Actor {
   constructor(

@@ -1,7 +1,7 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./config.js";
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
-import { playerSpeed } from "../config.js";
+import { playerSpeed } from "./config.js";
 
 export class Player extends Actor {
   constructor() {

@@ -1,5 +1,5 @@
 import { NewHTMLElement } from "./utils.js";
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./config.js";
 
 export const TILES = {
   FLOOR: 0,

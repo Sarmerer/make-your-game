@@ -1,4 +1,4 @@
-import { keyBindings } from "../config.js";
+import { keyBindings } from "./config.js";
 
 export class Controller {
   constructor() {

@@ -1,7 +1,6 @@
 import { Game } from "./game.js";
 import { Controller } from "./controller.js";
 import { Player } from "./player.js";
-import { capitalize } from "./utils.js";
 
 /**
  * @type {Game}
@@ -12,7 +11,7 @@ let game, world;
  */
 let player;
 /**
- * @type {Controller
+ * @type {Controller}
  */
 let controller;
 

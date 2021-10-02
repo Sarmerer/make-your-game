@@ -1,6 +1,6 @@
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
-import { ghostSpeed } from "../config.js";
+import { ghostSpeed } from "./config.js";
 
 export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost", color = "red") {

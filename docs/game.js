@@ -1,4 +1,4 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "../config.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./config.js";
 import { Player } from "./player.js";
 import { Ghost } from "./ghost.js";
 import { Tile } from "./tile.js";
