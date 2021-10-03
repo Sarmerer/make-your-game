@@ -1,4 +1,4 @@
-import { NewHTMLElement, rotateVector } from "./utils.js";
+import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
 import { BLOCK_HEIGHT, BLOCK_WIDTH, DIRECTIONS, ghostSpeed } from "./config.js";
 
