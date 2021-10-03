@@ -10,10 +10,18 @@ export function NewHTMLElement(elementType, props) {
   return el;
 }
 
-export function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 export function vectorMagnitude(ax, ay, bx, by) {
   return Math.sqrt(Math.pow(bx - ax, 2) + Math.pow(by - ay, 2));
+}
+
+export function shortestVectorIndex(vectors) {
+  let min = null;
+  let minIndex = -1;
+  for (let i = 0; i < vectors.length; i++) {
+    if (min == null || vectors[i] < min) {
+      min = vectors[i];
+      minIndex = i;
+    }
+  }
+  return minIndex;
 }

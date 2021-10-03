@@ -5,8 +5,15 @@ export const keyBindings = [
   { action: "down", keys: ["ArrowDown", "s"] },
 ];
 
-export const playerSpeed = 1.5;
-export const ghostSpeed = 1;
+export const playerSpeed = 1.25;
+export const ghostSpeed = 1.25;
 
 export const BLOCK_WIDTH = 30;
 export const BLOCK_HEIGHT = 30;
+
+export const DIRECTIONS = {
+  UP: "up",
+  DOWN: "down",
+  LEFT: "left",
+  RIGHT: "right",
+};

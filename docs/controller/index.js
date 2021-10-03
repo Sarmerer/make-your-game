@@ -1,4 +1,5 @@
-import { keyBindings } from "./config.js";
+import { keyBindings } from "../config.js";
+import { getKey } from "./keycodes.js";
 
 export class Controller {
   constructor() {
@@ -17,8 +18,10 @@ export class Controller {
   }
 
   onKeyPress(event) {
-    let state = event.type === "keydown" ? true : false;
-    let key = this._keyBindings.find((k) => k.keys.includes(event.key));
+    const state = event.type === "keydown" ? true : false;
+    const keyCodeValue = getKey(event.keyCode);
+    const key = this._keyBindings.find((k) => k.keys.includes(keyCodeValue));
+
     if (key) this._keysDown[key.action].setState(state);
   }
 

@@ -41,7 +41,7 @@ body {
 }
 
 #player.animate > img {
-  animation: player-walk 0.7s steps(3) infinite;
+  animation: player-walk 0.3s steps(3) infinite;
 }
 
 #player.walk-up {

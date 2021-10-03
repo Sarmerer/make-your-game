@@ -1,5 +1,5 @@
 import { Game } from "./game.js";
-import { Controller } from "./controller.js";
+import { Controller } from "./controller/index.js";
 import { Player } from "./player.js";
 
 /**
