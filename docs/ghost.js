@@ -12,7 +12,6 @@ export class Ghost extends Actor {
     super(x, y);
     this._id = id;
     this._speed = SPEED;
-    this._direction = null;
     this._div = NewHTMLElement("div", {
       id: id,
       style: {
@@ -24,6 +23,8 @@ export class Ghost extends Actor {
     });
 
     this._targetTile = null;
+    this._scatterMode = true;
+    this._scatterModeTimestamp = Date.now();
 
     this._animation = new Image(30, 30);
     this._animation.src = "./assets/pacman.png";
@@ -32,6 +33,14 @@ export class Ghost extends Actor {
 
   get targetTile() {
     return this._targetTile;
+  }
+
+  get scatterMode() {
+    return this._scatterMode;
+  }
+
+  setScatterMode(scatterMode) {
+    this._scatterMode = !!scatterMode;
   }
 
   createTargetTile() {
@@ -51,7 +60,6 @@ export class Ghost extends Actor {
   }
 
   move(direction) {
-    if (this.isOppositeDirection(direction)) return;
     this._direction = direction;
 
     this._div.className = `walk-${direction}`;
@@ -85,28 +93,43 @@ export class Ghost extends Actor {
     this._yVel = 0;
   }
 
-  get direction() {
-    return this._direction;
-  }
+  currentBehavior() {
+    if (this._scatterMode) {
+      return this.scatterBehavior;
+    }
 
-  isOppositeDirection(direction) {
-    const opposite = {
-      [DIRECTIONS.DOWN]: DIRECTIONS.UP,
-      [DIRECTIONS.LEFT]: DIRECTIONS.RIGHT,
-      [DIRECTIONS.UP]: DIRECTIONS.DOWN,
-      [DIRECTIONS.RIGHT]: DIRECTIONS.LEFT,
-    };
-
-    return this._direction == opposite[direction];
+    return this.chaseBehavior;
   }
 
   chaseBehavior(target, vector) {
+    this.enterScatterMode();
     return [
       target.xVirt,
       target.yVirt,
       this.xVirt + vector.x,
       this.yVirt + vector.y,
     ];
+  }
+
+  scatterBehavior(vector) {
+    this.leaveScatterMode();
+    return [27, -4, this.xVirt + vector.x, this.yVirt + vector.y];
+  }
+
+  enterScatterMode() {
+    const d = Date.now();
+    if (d - this._scatterModeTimestamp > 5000) {
+      this._scatterMode = true;
+      this._scatterModeTimestamp = d;
+    }
+  }
+
+  leaveScatterMode() {
+    const d = Date.now();
+    if (d - this._scatterModeTimestamp > 5000) {
+      this._scatterMode = false;
+      this._scatterModeTimestamp = d;
+    }
   }
 
   setTargetTile(x, y) {
@@ -146,7 +169,13 @@ export class Inky extends Ghost {
     const bx = this.xVirt + vector.x;
     const by = this.yVirt + vector.y;
 
+    this.enterScatterMode();
     return [ax, ay, bx, by];
+  }
+
+  scatterBehavior(vector) {
+    this.leaveScatterMode();
+    return [27, 27, this.xVirt + vector.x, this.yVirt + vector.y];
   }
 }
 
@@ -158,12 +187,18 @@ export class Pinky extends Ghost {
   chaseBehavior(target, vector) {
     const { x, y } = chaseOffsets[target.direction] || { x: 0, y: 0 };
 
+    this.enterScatterMode();
     return [
       target.xVirt + x * 2,
       target.yVirt + y * 2,
       this.xVirt + vector.x,
       this.yVirt + vector.y,
     ];
+  }
+
+  scatterBehavior(vector) {
+    this.leaveScatterMode();
+    return [3, -4, this.xVirt + vector.x, this.yVirt + vector.y];
   }
 }
 
@@ -179,11 +214,17 @@ export class Clyde extends Ghost {
       return [0, 23, this.xVirt + vector.x, this.yVirt + vector.y];
     }
 
+    this.enterScatterMode();
     return [
       target.xVirt - 4,
       target.yVirt - 4,
       this.xVirt + vector.x,
       this.yVirt + vector.y,
     ];
+  }
+
+  scatterBehavior(vector) {
+    this.leaveScatterMode();
+    return [0, 30, this.xVirt + vector.x, this.yVirt + vector.y];
   }
 }

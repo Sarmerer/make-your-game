@@ -1,4 +1,4 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./constants.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT, DIRECTIONS_OPPOSITE } from "./constants.js";
 
 export class Actor {
   constructor(
@@ -14,12 +14,18 @@ export class Actor {
     this._width = width;
     this._height = height;
 
+    this._direction = null;
+
     this._div = null;
   }
 
   draw() {
     this.div.style.top = `${this.y}px`;
     this.div.style.left = `${this.x}px`;
+  }
+
+  oppositeDirection() {
+    return DIRECTIONS_OPPOSITE[this._direction];
   }
 
   get x() {
@@ -61,6 +67,10 @@ export class Actor {
     return this._div;
   }
 
+  get direction() {
+    return this._direction;
+  }
+
   set x(value) {
     this._x = value;
   }
@@ -72,5 +82,9 @@ export class Actor {
   }
   set yv(value) {
     this._yVel = value;
+  }
+
+  set direction(value) {
+    this._direction = value;
   }
 }

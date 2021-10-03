@@ -138,13 +138,37 @@ export class Game {
 
     const availableDirections = this.ghostCanGo(ghost);
 
-    if (ghost.direction && !availableDirections.includes(ghost.direction))
+    if (ghost.direction && !availableDirections.includes(ghost.direction)) {
+      const nextDirection = {
+        [DIRECTIONS.UP]: DIRECTIONS.LEFT,
+        [DIRECTIONS.DOWN]: DIRECTIONS.RIGHT,
+        [DIRECTIONS.LEFT]: DIRECTIONS.DOWN,
+        [DIRECTIONS.RIGHT]: DIRECTIONS.UP,
+      };
+
+      let currentDir = ghost.direction;
+
+      let bestDir = null;
+      while (!bestDir) {
+        if (availableDirections.includes(nextDirection[currentDir])) {
+          bestDir = nextDirection[currentDir];
+        } else {
+          currentDir = nextDirection[currentDir];
+        }
+      }
+
+      if (bestDir) {
+        return ghost.move(bestDir);
+      }
       return ghost.stop();
+    }
 
     const vectorCache = [];
     const vectors = availableDirections.map((dir) => {
       const vector = directionToVector(dir);
-      const args = ghost.chaseBehavior(this._player, vector, this._ghosts);
+      const args = ghost.scatterMode
+        ? ghost.scatterBehavior(vector)
+        : ghost.chaseBehavior(this._player, vector, this._ghosts);
 
       vectorCache.push({ ax: args[0], ay: args[1] });
 
@@ -174,6 +198,13 @@ export class Game {
       const y = ghost.yVirt + v.y;
 
       if (this._world.tileIsFree(x, y)) directions.push(dir);
+    }
+
+    if (
+      directions.length > 1 &&
+      directions.includes(ghost.oppositeDirection())
+    ) {
+      return directions.filter((dir) => dir !== ghost.oppositeDirection());
     }
 
     return directions;
@@ -225,16 +256,16 @@ export class Game {
     this._canvas.appendChild(this._player.div);
   }
   spawnGhosts() {
-    const b = new Blinky(240, 360);
+    const b = new Blinky(240, 240);
     this._ghosts[b._id] = b;
 
-    const i = new Inky(270, 360);
+    const i = new Inky(270, 240);
     this._ghosts[i._id] = i;
 
-    const p = new Pinky(300, 360);
+    const p = new Pinky(300, 240);
     this._ghosts[p._id] = p;
 
-    const c = new Clyde(330, 360);
+    const c = new Clyde(330, 240);
     this._ghosts[c._id] = c;
 
     if (settings.debugMode) {

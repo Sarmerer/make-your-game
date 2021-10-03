@@ -75,11 +75,6 @@ export class Player extends Actor {
     this._div.className = "animate walk-right";
   }
 
-  draw() {
-    this.div.style.top = `${this.y}px`;
-    this.div.style.left = `${this.x}px`;
-  }
-
   get direction() {
     return this._direction;
   }
