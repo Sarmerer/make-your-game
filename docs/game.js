@@ -3,8 +3,10 @@ import {
   BLOCK_HEIGHT,
   DIRECTIONS,
   directionToVector,
-  SHOW_GHOSTS_TARGET_TILES,
-} from "./config.js";
+} from "./constants.js";
+
+import { settings, toggleSetting } from "./settings.js";
+
 import { Player } from "./player.js";
 import { Blinky, Clyde, Ghost, Inky, Pinky } from "./ghost.js";
 import { World } from "./world.js";
@@ -151,7 +153,7 @@ export class Game {
 
     const shortestIndex = shortestVectorIndex(vectors);
 
-    if (SHOW_GHOSTS_TARGET_TILES) {
+    if (settings.debugMode) {
       ghost.setTargetTile(
         vectorCache[shortestIndex].ax,
         vectorCache[shortestIndex].ay
@@ -235,10 +237,8 @@ export class Game {
     const c = new Clyde(330, 360);
     this._ghosts[c._id] = c;
 
-    if (SHOW_GHOSTS_TARGET_TILES) {
-      for (const g of Object.values(this._ghosts)) {
-        this._canvas.appendChild(g.createTargetTile());
-      }
+    if (settings.debugMode) {
+      this.createTargetTilesForGhosts();
     }
 
     for (const g of Object.values(this._ghosts)) {
@@ -256,6 +256,24 @@ export class Game {
     }
 
     return el;
+  }
+
+  createTargetTilesForGhosts() {
+    for (const g of Object.values(this._ghosts)) {
+      this._canvas.appendChild(g.createTargetTile());
+    }
+  }
+
+  toggleDebugMode() {
+    if (settings.debugMode) {
+      for (const g of Object.values(this._ghosts)) {
+        g.removeTargetTile();
+      }
+      return toggleSetting("debugMode");
+    }
+
+    this.createTargetTilesForGhosts();
+    toggleSetting("debugMode");
   }
 
   get player() {

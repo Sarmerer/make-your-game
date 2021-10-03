@@ -1,4 +1,4 @@
-import { keyBindings } from "../config.js";
+import { keyBindings, keySequnces } from "../settings.js";
 import { getKey } from "./keycodes.js";
 
 export class Controller {
@@ -7,9 +7,35 @@ export class Controller {
 
     this._keysDown = {};
     this._queue = null;
+    this._history = new Controller.History(10);
 
     this._keyBindings.forEach((key) => {
       this._keysDown[key.action] = new Controller.Input();
+    });
+
+    this._listeners = {};
+  }
+
+  on(eventName, callback) {
+    if (!this._listeners[eventName]) {
+      this._listeners[eventName] = [];
+    }
+
+    this._listeners[eventName].push(callback);
+  }
+  off(eventName, callback) {
+    if (!this._listeners[eventName]) return;
+
+    this._listeners[eventName].splice(
+      this._listeners[eventName].indexOf(callback),
+      1
+    );
+  }
+  dispatch(eventName, data) {
+    if (!this._listeners[eventName]) return;
+
+    this._listeners[eventName].forEach((callback) => {
+      callback(data);
     });
   }
 
@@ -18,11 +44,22 @@ export class Controller {
   }
 
   onKeyPress(event) {
-    const state = event.type === "keydown" ? true : false;
+    const keydown = event.type === "keydown" ? true : false;
     const keyCodeValue = getKey(event.keyCode);
+    if (!keyCodeValue) return;
+
     const key = this._keyBindings.find((k) => k.keys.includes(keyCodeValue));
 
-    if (key) this._keysDown[key.action].setState(state);
+    if (keydown) {
+      this._history.push(keyCodeValue);
+      for (const seq of keySequnces) {
+        if (this._history.match(seq.sequence)) {
+          this.dispatch(seq.event);
+        }
+      }
+    }
+
+    if (key) this._keysDown[key.action].setState(keydown);
   }
 
   isKeyDown(action) {
@@ -52,5 +89,35 @@ Controller.Input = class {
    */
   setState(state) {
     this.active = state;
+  }
+};
+
+Controller.History = class {
+  constructor(maxLength) {
+    this._history = [];
+    this._index = 0;
+    this._maxLength = maxLength || 10;
+  }
+
+  push(action) {
+    this._history.push(action);
+    if (this._history.length > this._maxLength) {
+      this._history.shift();
+    }
+    this._index = this._history.length - 1;
+  }
+
+  slice(start, end) {
+    return this._history.slice(start, end);
+  }
+
+  match(seq) {
+    if (seq.length > this._history.length) return false;
+
+    const history = this.slice(-seq.length);
+    for (let i = 0; i < seq.length; i++) {
+      if (seq[i] !== history[i]) return false;
+    }
+    return true;
   }
 };

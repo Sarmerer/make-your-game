@@ -1,12 +1,17 @@
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
-import { BLOCK_HEIGHT, BLOCK_WIDTH, DIRECTIONS, ghostSpeed } from "./config.js";
+import {
+  BLOCK_HEIGHT,
+  BLOCK_WIDTH,
+  DIRECTIONS,
+  GHOST_SPEED as SPEED,
+} from "./constants.js";
 
 export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost") {
     super(x, y);
     this._id = id;
-    this._speed = ghostSpeed;
+    this._speed = SPEED;
     this._direction = null;
     this._div = NewHTMLElement("div", {
       id: id,
@@ -37,6 +42,12 @@ export class Ghost extends Actor {
         left: "0px",
       },
     });
+    return this._targetTile;
+  }
+
+  removeTargetTile() {
+    this._targetTile.remove();
+    this._targetTile = null;
   }
 
   move(direction) {

@@ -1,17 +1,17 @@
 import {
+  PLAYER_SPEED as SPEED,
   BLOCK_WIDTH,
   BLOCK_HEIGHT,
   DIRECTIONS,
   validDirection,
-} from "./config.js";
+} from "./constants.js";
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
-import { playerSpeed } from "./config.js";
 
 export class Player extends Actor {
   constructor(x, y) {
     super(x, y);
-    this._speed = playerSpeed;
+    this._speed = SPEED;
     this._direction = null;
     this._div = NewHTMLElement("div", {
       id: "player",
