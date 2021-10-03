@@ -19,6 +19,57 @@ body {
   position: relative;
 }
 
+.tile {
+  user-select: none;
+  pointer-events: none;
+  background-color: black;
+  box-sizing: border-box;
+}
+
+.wall {
+  border: 1px solid blue;
+}
+
+.food,
+.pill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ghost-target {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+
+.ghost-target::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.ghost-target.pinky::after {
+  background-color: pink;
+}
+
+.ghost-target.inky::after {
+  background-color: cyan;
+}
+
+.ghost-target.blinky::after {
+  background-color: red;
+}
+
+.ghost-target.clyde::after {
+  background-color: yellow;
+}
+
 #score {
   color: white;
 }

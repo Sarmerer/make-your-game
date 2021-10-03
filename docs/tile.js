@@ -25,23 +25,22 @@ export class Tile {
     this._type = TILES.getKey(type);
     this.onCollide = null;
 
+    const classes = ["tile"];
+
+    if (this.typeIs(TILES.WALL)) classes.push("wall");
+    if (this.typeIs(TILES.FOOD)) classes.push("food");
+    if (this.typeIs(TILES.PILL)) classes.push("pill");
+    if (this.typeIs(TILES.BARRIER)) classes.push("barrier");
+    if (this.typeIs(TILES.PORTAL)) classes.push("portal");
+
     this._div = NewHTMLElement("div", {
+      class: classes,
       style: {
         width: `${BLOCK_WIDTH}px`,
         height: `${BLOCK_HEIGHT}px`,
-        userSelect: "none",
-        pointerEvents: "none",
-        backgroundColor: "black",
-        boxSizing: "border-box",
-        border: this.typeIs(TILES.WALL) ? "1px solid blue" : "none",
       },
     });
     if (this.typeIs(TILES.FOOD, TILES.PILL)) {
-      Object.assign(this._div.style, {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      });
       const isFood = this.typeIs(TILES.FOOD);
       this.onCollide = isFood ? this.onCollideFood : this.onCollidePill;
       const child = NewHTMLElement("div", {

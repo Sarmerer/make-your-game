@@ -1,11 +1,16 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./config.js";
+import {
+  BLOCK_WIDTH,
+  BLOCK_HEIGHT,
+  DIRECTIONS,
+  validDirection,
+} from "./config.js";
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
 import { playerSpeed } from "./config.js";
 
 export class Player extends Actor {
-  constructor() {
-    super();
+  constructor(x, y) {
+    super(x, y);
     this._speed = playerSpeed;
     this._direction = null;
     this._div = NewHTMLElement("div", {
@@ -24,17 +29,22 @@ export class Player extends Actor {
   }
 
   go(dir) {
+    const valid = validDirection(dir);
+    if (valid) {
+      this._direction = dir;
+    }
+
     switch (dir) {
-      case "up":
+      case DIRECTIONS.UP:
         this.goUp();
         break;
-      case "down":
+      case DIRECTIONS.DOWN:
         this.goDown();
         break;
-      case "left":
+      case DIRECTIONS.LEFT:
         this.goLeft();
         break;
-      case "right":
+      case DIRECTIONS.RIGHT:
         this.goRight();
         break;
     }
@@ -45,28 +55,24 @@ export class Player extends Actor {
     this._yVel = -this._speed;
     this._xVel = 0;
     this._div.className = "animate walk-up";
-    this._direction = "up";
   }
   goDown() {
     if (this._x % BLOCK_HEIGHT) return;
     this._yVel = this._speed;
     this._xVel = 0;
     this._div.className = "animate walk-down";
-    this._direction = "down";
   }
   goLeft() {
     if (this._y % BLOCK_WIDTH) return;
     this._yVel = 0;
     this._xVel = -this._speed;
     this._div.className = "animate walk-left";
-    this._direction = "left";
   }
   goRight() {
     if (this._y % BLOCK_WIDTH) return;
     this._yVel = 0;
     this._xVel = this._speed;
     this._div.className = "animate walk-right";
-    this._direction = "right";
   }
 
   draw() {
@@ -76,5 +82,12 @@ export class Player extends Actor {
 
   get direction() {
     return this._direction;
+  }
+
+  velocitySign() {
+    return this._direction == DIRECTIONS.UP ||
+      this._direction == DIRECTIONS.LEFT
+      ? -1
+      : 1;
   }
 }

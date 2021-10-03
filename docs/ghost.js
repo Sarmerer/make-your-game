@@ -1,14 +1,13 @@
-import { NewHTMLElement } from "./utils.js";
+import { NewHTMLElement, rotateVector } from "./utils.js";
 import { Actor } from "./actor.js";
-import { ghostSpeed } from "./config.js";
-import { vectorMagnitude } from "./utils.js";
+import { BLOCK_HEIGHT, BLOCK_WIDTH, DIRECTIONS, ghostSpeed } from "./config.js";
 
 export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost") {
     super(x, y);
     this._id = id;
     this._speed = ghostSpeed;
-    this._currentDirection = null;
+    this._direction = null;
     this._div = NewHTMLElement("div", {
       id: id,
       style: {
@@ -19,32 +18,48 @@ export class Ghost extends Actor {
       },
     });
 
+    this._targetTile = null;
+
     this._animation = new Image(30, 30);
     this._animation.src = "./assets/pacman.png";
     this._div.appendChild(this._animation);
   }
 
+  get targetTile() {
+    return this._targetTile;
+  }
+
+  createTargetTile() {
+    this._targetTile = NewHTMLElement("div", {
+      class: ["ghost-target", this._id],
+      style: {
+        top: "0px",
+        left: "0px",
+      },
+    });
+  }
+
   move(direction) {
     if (this.isOppositeDirection(direction)) return;
-    this._currentDirection = direction;
+    this._direction = direction;
 
     this._div.className = `walk-${direction}`;
     switch (direction) {
-      case "left":
-        this._xVel = -this._speed;
-        this._yVel = 0;
-        break;
-      case "right":
-        this._xVel = this._speed;
-        this._yVel = 0;
-        break;
-      case "up":
+      case DIRECTIONS.UP:
         this._xVel = 0;
         this._yVel = -this._speed;
         break;
-      case "down":
+      case DIRECTIONS.RIGHT:
+        this._xVel = this._speed;
+        this._yVel = 0;
+        break;
+      case DIRECTIONS.DOWN:
         this._xVel = 0;
         this._yVel = this._speed;
+        break;
+      case DIRECTIONS.LEFT:
+        this._xVel = -this._speed;
+        this._yVel = 0;
         break;
       default:
         this._xVel = 0;
@@ -54,55 +69,51 @@ export class Ghost extends Actor {
   }
 
   stop() {
-    this._currentDirection = null;
+    this._direction = null;
     this._xVel = 0;
     this._yVel = 0;
   }
 
-  get currentDirection() {
-    return this._currentDirection;
+  get direction() {
+    return this._direction;
   }
 
   isOppositeDirection(direction) {
     const opposite = {
-      left: "right",
-      right: "left",
-      up: "down",
-      down: "up",
+      [DIRECTIONS.DOWN]: DIRECTIONS.UP,
+      [DIRECTIONS.LEFT]: DIRECTIONS.RIGHT,
+      [DIRECTIONS.UP]: DIRECTIONS.DOWN,
+      [DIRECTIONS.RIGHT]: DIRECTIONS.LEFT,
     };
 
-    return this._currentDirection == opposite[direction];
+    return this._direction == opposite[direction];
   }
 
-  isBlinky() {
-    return this._id == "blinky";
+  chaseBehavior(target, vector) {
+    return [
+      target.xVirt,
+      target.yVirt,
+      this.xVirt + vector.x,
+      this.yVirt + vector.y,
+    ];
   }
 
-  isInky() {
-    return this._id == "inky";
-  }
-
-  isPinky() {
-    return this._id == "pinky";
-  }
-
-  isClyde() {
-    return this._id == "clyde";
+  setTargetTile(x, y) {
+    this._targetTile.style.left = `${x * BLOCK_HEIGHT}px`;
+    this._targetTile.style.top = `${y * BLOCK_WIDTH}px`;
   }
 }
 
-export class Pinky extends Ghost {
-  constructor(x = 90, y = 90) {
-    super(x, y, "pinky");
-  }
+export const chaseOffsets = {
+  [DIRECTIONS.UP]: { x: 0, y: -2 },
+  [DIRECTIONS.RIGHT]: { x: 2, y: 0 },
+  [DIRECTIONS.DOWN]: { x: 0, y: 2 },
+  [DIRECTIONS.LEFT]: { x: -2, y: 0 },
+};
 
-  chaseBehavior(pacman, ghosts, direction) {
-    return [
-      pacman.xVirt - 4,
-      pacman.yVirt - 4,
-      this.xVirt + direction.x,
-      this.yVirt + direction.y,
-    ];
+export class Blinky extends Ghost {
+  constructor(x = 90, y = 90) {
+    super(x, y, "blinky");
   }
 }
 
@@ -111,38 +122,36 @@ export class Inky extends Ghost {
     super(x, y, "inky");
   }
 
-  chaseBehavior(pacman, ghosts, direction) {
+  chaseBehavior(target, vector, ghosts) {
     const blinky = ghosts.blinky;
 
-    const xAxis =
-      pacman.direction == "left" || pacman.direction == "right" ? 1 : 0;
+    const { x, y } = chaseOffsets[target.direction] || { x: 0, y: 0 };
 
-    const sign =
-      pacman.direction == "left" || pacman.direction == "up" ? -1 : 1;
+    const tx = target.xVirt;
+    const ty = target.yVirt;
 
-    const xOffset = xAxis ? 2 * sign : 0;
-    const yOffset = xAxis ? 0 : 2 * sign;
-
-    const ax = (Math.abs(blinky.xVirt - pacman.xVirt) + xOffset) * 2;
-    const ay = (Math.abs(blinky.yVirt - pacman.yVirt) + yOffset) * 2;
-    const bx = this.xVirt + direction.x;
-    const by = this.yVirt + direction.y;
+    const ax = tx + (tx - blinky.xVirt) + x;
+    const ay = ty + (ty - blinky.yVirt) + y;
+    const bx = this.xVirt + vector.x;
+    const by = this.yVirt + vector.y;
 
     return [ax, ay, bx, by];
   }
 }
 
-export class Blinky extends Ghost {
+export class Pinky extends Ghost {
   constructor(x = 90, y = 90) {
-    super(x, y, "blinky");
+    super(x, y, "pinky");
   }
 
-  chaseBehavior(pacman, ghosts, direction) {
+  chaseBehavior(target, vector) {
+    const { x, y } = chaseOffsets[target.direction] || { x: 0, y: 0 };
+
     return [
-      pacman.xVirt,
-      pacman.yVirt,
-      this.xVirt + direction.x,
-      this.yVirt + direction.y,
+      target.xVirt + x * 2,
+      target.yVirt + y * 2,
+      this.xVirt + vector.x,
+      this.yVirt + vector.y,
     ];
   }
 }
@@ -152,12 +161,18 @@ export class Clyde extends Ghost {
     super(x, y, "clyde");
   }
 
-  chaseBehavior(pacman, ghosts, direction) {
+  chaseBehavior(target, vector) {
+    const distance =
+      Math.abs(target.xVirt - this.xVirt) + Math.abs(target.yVirt - this.yVirt);
+    if (distance < 8) {
+      return [0, 23, this.xVirt + vector.x, this.yVirt + vector.y];
+    }
+
     return [
-      pacman.xVirt - 4,
-      pacman.yVirt - 4,
-      this.xVirt + direction.x,
-      this.yVirt + direction.y,
+      target.xVirt - 4,
+      target.yVirt - 4,
+      this.xVirt + vector.x,
+      this.yVirt + vector.y,
     ];
   }
 }

@@ -26,7 +26,12 @@ export class Controller {
   }
 
   isKeyDown(action) {
-    return this._queue == action || this._keysDown[action].active;
+    if (this._queue == action) {
+      this.clearQueue();
+      return true;
+    }
+
+    return this._keysDown[action].active;
   }
 
   setQueue(action) {

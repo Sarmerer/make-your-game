@@ -7,6 +7,11 @@ export function NewHTMLElement(elementType, props) {
   if (!el) return null;
   if (props) Object.assign(el, props);
   if (props?.style) Object.assign(el.style, props.style);
+  if (props?.class) {
+    Array.isArray(props.class)
+      ? el.classList.add(...props.class)
+      : el.classList.add(props.class);
+  }
   return el;
 }
 

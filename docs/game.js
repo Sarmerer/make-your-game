@@ -1,4 +1,10 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./config.js";
+import {
+  BLOCK_WIDTH,
+  BLOCK_HEIGHT,
+  DIRECTIONS,
+  directionToVector,
+  SHOW_GHOSTS_TARGET_TILES,
+} from "./config.js";
 import { Player } from "./player.js";
 import { Blinky, Clyde, Ghost, Inky, Pinky } from "./ghost.js";
 import { World } from "./world.js";
@@ -12,14 +18,13 @@ export class Game {
     this._gameArea = this.getOrCreateGameContainer("game-area");
     this._canvas = this.getOrCreateGameContainer("canvas");
 
-    this._world = new World();
-    this._player = new Player();
-    this._canvas.appendChild(this._player.div);
+    this._world = null;
+    this._player = null;
+
     this._score = 0;
     this._scorePerFood = 10;
-    this._scoreToWin =
-      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
-      this._scorePerFood;
+    this._scoreToWin = 0;
+
     this._scoreDiv = document.getElementById("score");
     if (!this._scoreDiv) {
       this._scoreDiv = document.createElement("div");
@@ -28,12 +33,63 @@ export class Game {
     }
 
     this._ghosts = {};
+  }
+
+  init() {
+    this._world = new World();
+    this._scoreToWin =
+      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
+      this._scorePerFood;
+
+    this.spawnPlayer();
     this.spawnGhosts();
+
+    const map = this._world.draw();
+    this._canvas.append(map);
+  }
+
+  start() {
+    this.draw();
+  }
+
+  restart() {
+    this._canvas.innerHTML = "";
+
+    this._score = 0;
+    this._scoreDiv.textContent = `${this._score}`;
+
+    this._world = new World();
+    this._scoreToWin =
+      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
+      this._scorePerFood;
+
+    this._player.div.remove();
+    for (const ghost of Object.values(this._ghosts)) {
+      ghost.div.remove();
+    }
+
+    this._world = new World();
+    this._scoreToWin =
+      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
+      this._scorePerFood;
+
+    this.spawnPlayer();
+    this.spawnGhosts();
+
+    const map = this._world.draw();
+    this._canvas.append(map);
   }
 
   update() {
+    for (const g of Object.values(this._ghosts)) {
+      if (g.xVirt == this._player.xVirt && g.yVirt == this._player.yVirt) {
+        this.restart();
+      }
+    }
+
     this.moveGhosts();
     this.movePlayer();
+
     this.draw();
   }
 
@@ -61,7 +117,8 @@ export class Game {
     const tile = this._world.tiles.get(
       `${this._player.yVirt}-${this._player.xVirt}`
     );
-    if (tile.onCollide) this.callEvent(tile.onCollide());
+
+    if (tile?.onCollide) this.callEvent(tile.onCollide());
   }
 
   moveGhosts() {
@@ -79,19 +136,29 @@ export class Game {
 
     const availableDirections = this.ghostCanGo(ghost);
 
-    if (
-      ghost.currentDirection &&
-      !availableDirections.some((d) => d.direction == ghost.currentDirection)
-    )
+    if (ghost.direction && !availableDirections.includes(ghost.direction))
       return ghost.stop();
 
+    const vectorCache = [];
     const vectors = availableDirections.map((dir) => {
-      const args = ghost.chaseBehavior(this._player, this._ghosts, dir);
+      const vector = directionToVector(dir);
+      const args = ghost.chaseBehavior(this._player, vector, this._ghosts);
+
+      vectorCache.push({ ax: args[0], ay: args[1] });
+
       return vectorMagnitude(...args);
     });
 
-    const longest = shortestVectorIndex(vectors);
-    const direction = availableDirections[longest].direction;
+    const shortestIndex = shortestVectorIndex(vectors);
+
+    if (SHOW_GHOSTS_TARGET_TILES) {
+      ghost.setTargetTile(
+        vectorCache[shortestIndex].ax,
+        vectorCache[shortestIndex].ay
+      );
+    }
+
+    const direction = availableDirections[shortestIndex];
 
     ghost.move(direction);
   }
@@ -99,26 +166,15 @@ export class Game {
   ghostCanGo(ghost) {
     const directions = [];
 
-    const variants = {
-      up: { x: 0, y: -1 },
-      down: { x: 0, y: 1 },
-      left: { x: -1, y: 0 },
-      right: { x: 1, y: 0 },
-    };
+    for (const dir of Object.values(DIRECTIONS)) {
+      const v = directionToVector(dir);
+      const x = ghost.xVirt + v.x;
+      const y = ghost.yVirt + v.y;
 
-    for (const [k, v] of Object.entries(variants)) {
-      if (this._world.tileIsFree(ghost.xVirt + v.x, ghost.yVirt + v.y))
-        directions.push({ direction: k, ...v });
+      if (this._world.tileIsFree(x, y)) directions.push(dir);
     }
 
     return directions;
-  }
-
-  start() {
-    const map = this._world.draw();
-    this._canvas.append(map);
-
-    this.draw();
   }
 
   draw() {
@@ -138,13 +194,13 @@ export class Game {
 
   playerCanGo(dir) {
     switch (dir) {
-      case "up":
+      case DIRECTIONS.UP:
         return this.playerCanGoUp();
-      case "down":
+      case DIRECTIONS.DOWN:
         return this.playerCanGoDown();
-      case "left":
+      case DIRECTIONS.LEFT:
         return this.playerCanGoLeft();
-      case "right":
+      case DIRECTIONS.RIGHT:
         return this.playerCanGoRight();
     }
   }
@@ -162,18 +218,28 @@ export class Game {
     return this._world.tileIsFree(this._player.xVirt + 1, this._player.yVirt);
   }
 
+  spawnPlayer() {
+    this._player = new Player(270, 420);
+    this._canvas.appendChild(this._player.div);
+  }
   spawnGhosts() {
-    const p = new Pinky(30, 30);
-    this._ghosts[p._id] = p;
+    const b = new Blinky(240, 360);
+    this._ghosts[b._id] = b;
 
-    const i = new Inky(500, 500);
+    const i = new Inky(270, 360);
     this._ghosts[i._id] = i;
 
-    const c = new Clyde(100, 500);
+    const p = new Pinky(300, 360);
+    this._ghosts[p._id] = p;
+
+    const c = new Clyde(330, 360);
     this._ghosts[c._id] = c;
 
-    const b = new Blinky(500, 100);
-    this._ghosts[b._id] = b;
+    if (SHOW_GHOSTS_TARGET_TILES) {
+      for (const g of Object.values(this._ghosts)) {
+        this._canvas.appendChild(g.createTargetTile());
+      }
+    }
 
     for (const g of Object.values(this._ghosts)) {
       this._canvas.appendChild(g.div);
