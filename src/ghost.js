@@ -1,11 +1,15 @@
+/// <reference path="./ghost.d.ts" />
+
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
 import {
   BLOCK_HEIGHT,
   BLOCK_WIDTH,
   DIRECTIONS,
+  DIRECTION_TO_STRING,
   GHOST_SPEED as SPEED,
 } from "./constants.js";
+import { settings } from "./settings.js";
 
 export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost") {
@@ -24,6 +28,7 @@ export class Ghost extends Actor {
 
     this._targetTile = null;
     this._scatterMode = true;
+    this._inTheHouse = true;
     this._scatterModeTimestamp = Date.now();
 
     this._animation = new Image(30, 30);
@@ -62,7 +67,7 @@ export class Ghost extends Actor {
   move(direction) {
     this._direction = direction;
 
-    this._div.className = `walk-${direction}`;
+    this._div.className = `walk-${DIRECTION_TO_STRING[direction]}`;
     switch (direction) {
       case DIRECTIONS.UP:
         this._xVel = 0;
@@ -94,9 +99,8 @@ export class Ghost extends Actor {
   }
 
   currentBehavior() {
-    if (this._scatterMode) {
-      return this.scatterBehavior;
-    }
+    if (this._inTheHouse) return this.exitHouseBehavior;
+    if (this._scatterMode) return this.scatterBehavior;
 
     return this.chaseBehavior;
   }
@@ -113,7 +117,7 @@ export class Ghost extends Actor {
 
   scatterBehavior(vector) {
     this.leaveScatterMode();
-    return [27, -4, this.xVirt + vector.x, this.yVirt + vector.y];
+    return [35, -4, this.xVirt + vector.x, this.yVirt + vector.y];
   }
 
   enterScatterMode() {
@@ -122,6 +126,10 @@ export class Ghost extends Actor {
       this._scatterMode = true;
       this._scatterModeTimestamp = d;
     }
+  }
+
+  exitHouseBehavior() {
+    return [13, 8, this.xVirt, this.yVirt];
   }
 
   leaveScatterMode() {

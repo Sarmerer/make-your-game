@@ -2,18 +2,16 @@ import { NewHTMLElement } from "./utils.js";
 import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./constants.js";
 
 export const TILES = {
-  FLOOR: 0,
-  WALL: 1,
-  FOOD: 2,
-  PILL: 3,
-  BARRIER: 4,
-  PORTAL: 5,
-
-  getKey(value) {
-    const tile = Object.entries(this).find(([, v]) => v === value);
-    return tile.length ? this[tile[0]] : this.FLOOR;
-  },
+  FLOOR: "_",
+  WALL: "|",
+  FOOD: ".",
+  PILL: "o",
+  BARRIER: "-",
 };
+
+export function getTile(tile) {
+  return Object.values(TILES).find((t) => t === tile) || TILES.FLOOR;
+}
 
 export const EVENTS = {
   ATE_FOOD: "ate-food",
@@ -22,7 +20,7 @@ export const EVENTS = {
 
 export class Tile {
   constructor(type = TILES.FLOOR) {
-    this._type = TILES.getKey(type);
+    this._type = getTile(type);
     this.onCollide = null;
 
     const classes = ["tile"];

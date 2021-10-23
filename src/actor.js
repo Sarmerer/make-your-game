@@ -1,3 +1,5 @@
+/// <reference path="./actor.d.ts" />
+
 import { BLOCK_WIDTH, BLOCK_HEIGHT, DIRECTIONS_OPPOSITE } from "./constants.js";
 
 export class Actor {

@@ -23,6 +23,7 @@ export const settings = {
   godMode: false,
   onePunchMode: false,
   noChaseMode: false,
+  freezeGhosts: false,
 };
 
 export function changeSetting(settingName, value) {

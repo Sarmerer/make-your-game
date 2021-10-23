@@ -89,7 +89,7 @@ export class Game {
       }
     }
 
-    this.moveGhosts();
+    if (!settings.freezeGhosts) this.moveGhosts();
     this.movePlayer();
 
     this.draw();
@@ -106,14 +106,14 @@ export class Game {
   }
 
   movePlayer() {
-    if (this._player.xv < 0 && this.playerCanGoLeft())
+    if (this._player.xv < 0 && this.playerCanGo(DIRECTIONS.LEFT))
       this._player.x += this._player.xv;
-    else if (this._player.xv > 0 && this.playerCanGoRight())
+    else if (this._player.xv > 0 && this.playerCanGo(DIRECTIONS.RIGHT))
       this._player.x += this._player.xv;
 
-    if (this._player.yv < 0 && this.playerCanGoUp())
+    if (this._player.yv < 0 && this.playerCanGo(DIRECTIONS.UP))
       this._player.y += this._player.yv;
-    else if (this._player.yv > 0 && this.playerCanGoDown())
+    else if (this._player.yv > 0 && this.playerCanGo(DIRECTIONS.DOWN))
       this._player.y += this._player.yv;
 
     const tile = this._world.tiles.get(
@@ -166,9 +166,7 @@ export class Game {
     const vectorCache = [];
     const vectors = availableDirections.map((dir) => {
       const vector = directionToVector(dir);
-      const args = ghost.scatterMode
-        ? ghost.scatterBehavior(vector)
-        : ghost.chaseBehavior(this._player, vector, this._ghosts);
+      const args = ghost.currentBehavior().apply(ghost, [vector]);
 
       vectorCache.push({ ax: args[0], ay: args[1] });
 
@@ -197,7 +195,15 @@ export class Game {
       const x = ghost.xVirt + v.x;
       const y = ghost.yVirt + v.y;
 
-      if (this._world.tileIsFree(x, y)) directions.push(dir);
+      const tile = this._world.getTile(x, y);
+
+      if (
+        (this._world.isInBounds(x, y) && tile._type == TILES.WALL) ||
+        (tile._type === TILES.BARRIER && !ghost._inTheHouse)
+      )
+        continue;
+
+      directions.push(dir);
     }
 
     if (
@@ -226,46 +232,28 @@ export class Game {
   }
 
   playerCanGo(dir) {
-    switch (dir) {
-      case DIRECTIONS.UP:
-        return this.playerCanGoUp();
-      case DIRECTIONS.DOWN:
-        return this.playerCanGoDown();
-      case DIRECTIONS.LEFT:
-        return this.playerCanGoLeft();
-      case DIRECTIONS.RIGHT:
-        return this.playerCanGoRight();
-    }
-  }
-
-  playerCanGoUp() {
-    return this._world.tileIsFree(this._player.xVirt, this._player.yVirt - 1);
-  }
-  playerCanGoDown() {
-    return this._world.tileIsFree(this._player.xVirt, this._player.yVirt + 1);
-  }
-  playerCanGoLeft() {
-    return this._world.tileIsFree(this._player.xVirt - 1, this._player.yVirt);
-  }
-  playerCanGoRight() {
-    return this._world.tileIsFree(this._player.xVirt + 1, this._player.yVirt);
+    const vector = directionToVector(dir);
+    const x = this._player.xVirt + vector.x;
+    const y = this._player.yVirt + vector.y;
+    return this._world.tileIsFree(x, y);
   }
 
   spawnPlayer() {
     this._player = new Player(270, 420);
     this._canvas.appendChild(this._player.div);
   }
+
   spawnGhosts() {
-    const b = new Blinky(240, 240);
+    const b = new Blinky(390, 420);
     this._ghosts[b._id] = b;
 
-    const i = new Inky(270, 240);
+    const i = new Inky(420, 420);
     this._ghosts[i._id] = i;
 
-    const p = new Pinky(300, 240);
+    const p = new Pinky(390, 450);
     this._ghosts[p._id] = p;
 
-    const c = new Clyde(330, 240);
+    const c = new Clyde(420, 450);
     this._ghosts[c._id] = c;
 
     if (settings.debugMode) {
