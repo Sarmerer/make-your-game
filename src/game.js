@@ -106,15 +106,28 @@ export class Game {
   }
 
   movePlayer() {
-    if (this._player.xv < 0 && this.playerCanGo(DIRECTIONS.LEFT))
-      this._player.x += this._player.xv;
-    else if (this._player.xv > 0 && this.playerCanGo(DIRECTIONS.RIGHT))
-      this._player.x += this._player.xv;
+    const vec = directionToVector(this._player.direction);
+    if (!vec) return;
 
-    if (this._player.yv < 0 && this.playerCanGo(DIRECTIONS.UP))
-      this._player.y += this._player.yv;
-    else if (this._player.yv > 0 && this.playerCanGo(DIRECTIONS.DOWN))
-      this._player.y += this._player.yv;
+    const availableDirections = this.playerCanGo();
+    if (!availableDirections[this._player.direction]) {
+      this._player._direction = null;
+      return;
+    }
+
+    const now = Date.now();
+    const diff = now - this._player._lastMove;
+    const pxPerMove = 5;
+    if (diff < 2) return;
+
+    const distance = pxPerMove / diff;
+    this._player._xVel = vec.x * distance;
+    this._player._yVel = vec.y * distance;
+
+    this._player.x += this._player._xVel;
+    this._player.y += this._player._yVel;
+
+    this.player._lastMove = now;
 
     const tile = this._world.tiles.get(
       `${this._player.yVirt}-${this._player.xVirt}`
@@ -196,6 +209,7 @@ export class Game {
       const y = ghost.yVirt + v.y;
 
       const tile = this._world.getTile(x, y);
+      if (!tile) return [];
 
       if (
         (this._world.isInBounds(x, y) && tile._type == TILES.WALL) ||
@@ -231,11 +245,26 @@ export class Game {
     this._player.draw();
   }
 
-  playerCanGo(dir) {
-    const vector = directionToVector(dir);
-    const x = this._player.xVirt + vector.x;
-    const y = this._player.yVirt + vector.y;
-    return this._world.tileIsFree(x, y);
+  playerCanGo() {
+    const directions = {};
+
+    const xVirt = this.player.xVirt;
+    const yVirt = this.player.yVirt;
+
+    const tilesAround = [
+      { x: xVirt - 1, y: yVirt, dir: DIRECTIONS.LEFT },
+      { x: xVirt + 1, y: yVirt, dir: DIRECTIONS.RIGHT },
+      { x: xVirt, y: yVirt - 1, dir: DIRECTIONS.UP },
+      { x: xVirt, y: yVirt + 1, dir: DIRECTIONS.DOWN },
+    ];
+
+    for (const tile of tilesAround) {
+      const tileFree = this._world.tileIsFree(tile.x, tile.y);
+
+      if (tileFree) directions[tile.dir] = true;
+    }
+
+    return directions;
   }
 
   spawnPlayer() {

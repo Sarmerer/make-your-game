@@ -1,4 +1,4 @@
-export const PLAYER_SPEED = 1.5;
+export const PLAYER_SPEED = 5;
 export const GHOST_SPEED = 1.25;
 
 export const BLOCK_WIDTH = 30;
@@ -39,7 +39,7 @@ export function directionToString(direction) {
 }
 
 export function directionToVector(direction) {
-  return DIRECTION_TO_VECTOR[direction] ?? { x: 1, y: 1 };
+  return DIRECTION_TO_VECTOR[direction] ?? { x: 0, y: 0 };
 }
 
 export function validDirection(direction) {

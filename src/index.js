@@ -86,7 +86,8 @@ function loop() {
     const dirStr = directionToString(dir);
     if (!controller.isKeyDown(dirStr)) continue;
 
-    if (game.playerCanGo(dir)) player.go(dir);
+    const availableDirections = game.playerCanGo();
+    if (availableDirections[dir]) player.redirect(dir);
     else controller.setQueue(dirStr);
   }
 

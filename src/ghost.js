@@ -1,15 +1,14 @@
-/// <reference path="./ghost.d.ts" />
-
 import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
 import {
   BLOCK_HEIGHT,
   BLOCK_WIDTH,
   DIRECTIONS,
-  DIRECTION_TO_STRING,
+  DIRECTIONS_OPPOSITE,
+  directionToString,
+  directionToVector,
   GHOST_SPEED as SPEED,
 } from "./constants.js";
-import { settings } from "./settings.js";
 
 export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost") {
@@ -67,29 +66,15 @@ export class Ghost extends Actor {
   move(direction) {
     this._direction = direction;
 
-    this._div.className = `walk-${DIRECTION_TO_STRING[direction]}`;
-    switch (direction) {
-      case DIRECTIONS.UP:
-        this._xVel = 0;
-        this._yVel = -this._speed;
-        break;
-      case DIRECTIONS.RIGHT:
-        this._xVel = this._speed;
-        this._yVel = 0;
-        break;
-      case DIRECTIONS.DOWN:
-        this._xVel = 0;
-        this._yVel = this._speed;
-        break;
-      case DIRECTIONS.LEFT:
-        this._xVel = -this._speed;
-        this._yVel = 0;
-        break;
-      default:
-        this._xVel = 0;
-        this._yVel = 0;
-        break;
-    }
+    const vector = directionToVector(this._direction);
+
+    this._yVel = vector.y * this._speed;
+    this._xVel = vector.x * this._speed;
+    this._div.className = `walk-${directionToString(this._direction)}`;
+  }
+
+  oppositeDirection() {
+    return DIRECTIONS_OPPOSITE[this._direction];
   }
 
   stop() {

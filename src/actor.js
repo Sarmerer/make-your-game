@@ -1,6 +1,4 @@
-/// <reference path="./actor.d.ts" />
-
-import { BLOCK_WIDTH, BLOCK_HEIGHT, DIRECTIONS_OPPOSITE } from "./constants.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./constants.js";
 
 export class Actor {
   constructor(
@@ -16,6 +14,7 @@ export class Actor {
     this._width = width;
     this._height = height;
 
+    this._lastMove = Date.now();
     this._direction = null;
 
     this._div = null;
@@ -26,21 +25,48 @@ export class Actor {
     this.div.style.left = `${this.x}px`;
   }
 
-  oppositeDirection() {
-    return DIRECTIONS_OPPOSITE[this._direction];
-  }
-
   get x() {
     return this._x;
+  }
+  set x(value) {
+    this._x = value;
   }
   get y() {
     return this._y;
   }
+  set y(value) {
+    this._y = value;
+  }
+
   get xv() {
     return this._xVel;
   }
+  set xv(value) {
+    this._xVel = value;
+  }
   get yv() {
     return this._yVel;
+  }
+  set yv(value) {
+    this._yVel = value;
+  }
+
+  get direction() {
+    return this._direction;
+  }
+  set direction(value) {
+    this._direction = value;
+  }
+
+  get xVirt() {
+    return Math.floor(this._x / BLOCK_WIDTH);
+  }
+  get yVirt() {
+    return Math.floor(this._y / BLOCK_WIDTH);
+  }
+
+  get div() {
+    return this._div;
   }
   get top() {
     return this._x;
@@ -53,40 +79,5 @@ export class Actor {
   }
   get left() {
     return this._y;
-  }
-  get xVirt() {
-    return this._xVel > 0
-      ? Math.floor(this._x / BLOCK_WIDTH)
-      : Math.ceil(this._x / BLOCK_WIDTH);
-  }
-  get yVirt() {
-    return this._yVel > 0
-      ? Math.floor(this._y / BLOCK_HEIGHT)
-      : Math.ceil(this._y / BLOCK_HEIGHT);
-  }
-
-  get div() {
-    return this._div;
-  }
-
-  get direction() {
-    return this._direction;
-  }
-
-  set x(value) {
-    this._x = value;
-  }
-  set y(value) {
-    this._y = value;
-  }
-  set xv(value) {
-    this._xVel = value;
-  }
-  set yv(value) {
-    this._yVel = value;
-  }
-
-  set direction(value) {
-    this._direction = value;
   }
 }

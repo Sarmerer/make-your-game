@@ -33,12 +33,10 @@ export function changeSetting(settingName, value) {
 }
 
 export function toggleSetting(settingName) {
-  if (settings.hasOwnProperty(settingName)) {
-    settings[settingName] = !settings[settingName];
-  }
+  changeSetting(settingName, !settings[settingName]);
 }
 
-export const keySequnces = [
+export const keySequences = [
   {
     name: "DEBUG",
     event: events.toggleDebugMode,

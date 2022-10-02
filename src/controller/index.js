@@ -1,4 +1,4 @@
-import { keyBindings, keySequnces } from "../settings.js";
+import { keyBindings, keySequences } from "../settings.js";
 import { getKey } from "./keycodes.js";
 
 export class Controller {
@@ -52,7 +52,7 @@ export class Controller {
 
     if (keydown) {
       this._history.push(keyCodeValue);
-      for (const seq of keySequnces) {
+      for (const seq of keySequences) {
         if (this._history.match(seq.sequence)) {
           this.dispatch(seq.event);
         }
