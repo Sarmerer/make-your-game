@@ -71,16 +71,7 @@ export class Game {
       ghost.el.remove();
     }
 
-    this.world = new World();
-    this._scoreToWin =
-      this.world.map.flat().filter((c) => c === TILE.FOOD).length *
-      this._scorePerFood;
-
-    this.spawnPlayer();
-    this.spawnGhosts();
-
-    const map = this.world.create_();
-    this._canvas.append(map);
+    this.create_();
   }
 
   update_() {

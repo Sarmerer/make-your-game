@@ -4,6 +4,7 @@
  */
 export function NewHTMLElement(elementType, props) {
   const el = document.createElement(elementType);
+  props = Object.assign({}, props);
 
   if (props.style) {
     Object.assign(el.style, props.style);

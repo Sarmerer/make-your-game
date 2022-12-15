@@ -82,7 +82,7 @@ export class GameObject {
         debuggerEntry.handler.bind(this),
         element
       );
-      this.debugDisabled(debuggerEntry.name);
+      this.debugEnabled(debuggerEntry.name);
     }
     return this.getDebugElements_();
   }
@@ -90,12 +90,11 @@ export class GameObject {
   debugDisable_() {
     for (const debuggerName of Object.keys(this.activeDebuggers_)) {
       this.removeDebugger_(debuggerName);
+      this.debugDisabled(debuggerName);
     }
-
-    this.debugDisabled();
   }
 
   debugEnabled(name) {}
 
-  debugDisabled() {}
+  debugDisabled(name) {}
 }
