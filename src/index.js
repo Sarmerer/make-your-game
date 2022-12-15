@@ -15,7 +15,7 @@ let controller;
 
 window.onload = function () {
   game = new Game();
-  game.init();
+  game.create_();
 
   controller = new Controller();
 
@@ -27,6 +27,7 @@ window.onload = function () {
   });
 
   controller.on(events.toggleDebugMode, () => {
+    toggleSetting("debugMode");
     game.toggleDebugMode();
   });
 
@@ -53,6 +54,7 @@ window.onload = function () {
   controller.on(events.heal, () => {
     // game.heal();
   });
+
   controller.on(events.toggleNoChase, () => {
     // game.toggleNoChase();
   });
@@ -79,19 +81,17 @@ function resume() {
 }
 
 function loop() {
-  const player = game._player;
   const dirs = Object.values(DIRECTIONS);
 
   for (let dir of dirs) {
     const dirStr = directionToString(dir);
     if (!controller.isKeyDown(dirStr)) continue;
 
-    const availableDirections = game.playerCanGo();
-    if (availableDirections[dir]) player.redirect(dir);
+    if (game.isPlayerAbleToGo(dir)) game.player.redirect(dir);
     else controller.setQueue(dirStr);
   }
 
-  game.update();
+  game.update_();
 
   if (!settings.gamePaused) window.requestAnimationFrame(loop);
 }

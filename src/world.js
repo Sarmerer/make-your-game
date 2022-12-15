@@ -1,5 +1,5 @@
 import { NewHTMLElement } from "./utils.js";
-import { TILES } from "./tile.js";
+import { TILE } from "./tile.js";
 import { Tile } from "./tile.js";
 import { mapgen } from "./mapgen/mapgen.js";
 
@@ -21,7 +21,7 @@ export class World {
     return this._tiles;
   }
 
-  draw() {
+  create_() {
     const map = NewHTMLElement("div", {
       style: {
         display: "grid",
@@ -33,7 +33,8 @@ export class World {
       const row = this.map[y];
       for (let x = 0; x < row.length; x++) {
         const tile = new Tile(this.map[y][x]);
-        map.appendChild(tile.div);
+        tile.create_();
+        map.appendChild(tile.el);
         this.tiles.set(`${y}-${x}`, tile);
       }
     }
@@ -47,7 +48,7 @@ export class World {
   tileIsWall(x, y) {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) return true;
     const tile = this.map[y][x];
-    if (tile === TILES.WALL) {
+    if (tile === TILE.WALL) {
       return true;
     }
     return false;

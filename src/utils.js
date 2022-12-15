@@ -3,15 +3,19 @@
  * @param {Object} props target element props
  */
 export function NewHTMLElement(elementType, props) {
-  let el = document.createElement(elementType);
-  if (!el) return null;
-  if (props) Object.assign(el, props);
-  if (props?.style) Object.assign(el.style, props.style);
-  if (props?.class) {
-    Array.isArray(props.class)
-      ? el.classList.add(...props.class)
-      : el.classList.add(props.class);
+  const el = document.createElement(elementType);
+
+  if (props.style) {
+    Object.assign(el.style, props.style);
+    delete props.style;
   }
+
+  if (props.classList) {
+    el.classList.add(...props.classList);
+    delete props.classList;
+  }
+
+  Object.assign(el, props);
   return el;
 }
 

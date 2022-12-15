@@ -13,15 +13,15 @@ import { World } from "./world.js";
 
 import { shortestVectorIndex, vectorMagnitude } from "./utils.js";
 
-import { TILES, EVENTS } from "./tile.js";
+import { TILE } from "./tile.js";
 
 export class Game {
   constructor() {
-    this._gameArea = this.getOrCreateGameContainer("game-area");
-    this._canvas = this.getOrCreateGameContainer("canvas");
+    this._gameArea = document.getElementById("game-area");
+    this._canvas = document.getElementById("canvas");
 
-    this._world = null;
-    this._player = null;
+    this.world = null;
+    this.player = null;
 
     this._score = 0;
     this._scorePerFood = 10;
@@ -37,21 +37,22 @@ export class Game {
     this._ghosts = {};
   }
 
-  init() {
-    this._world = new World();
+  create_() {
+    this.world = new World();
     this._scoreToWin =
-      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
+      this.world.map.flat().filter((c) => c === TILE.FOOD).length *
       this._scorePerFood;
 
     this.spawnPlayer();
     this.spawnGhosts();
 
-    const map = this._world.draw();
+    const map = this.world.create_();
     this._canvas.append(map);
+    this.toggleDebugMode();
   }
 
   start() {
-    this.draw();
+    this.draw_();
   }
 
   restart() {
@@ -60,31 +61,31 @@ export class Game {
     this._score = 0;
     this._scoreDiv.textContent = `${this._score}`;
 
-    this._world = new World();
+    this.world = new World();
     this._scoreToWin =
-      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
+      this.world.map.flat().filter((c) => c === TILE.FOOD).length *
       this._scorePerFood;
 
-    this._player.div.remove();
+    this.player.el.remove();
     for (const ghost of Object.values(this._ghosts)) {
-      ghost.div.remove();
+      ghost.el.remove();
     }
 
-    this._world = new World();
+    this.world = new World();
     this._scoreToWin =
-      this._world.map.flat().filter((c) => c === TILES.FOOD).length *
+      this.world.map.flat().filter((c) => c === TILE.FOOD).length *
       this._scorePerFood;
 
     this.spawnPlayer();
     this.spawnGhosts();
 
-    const map = this._world.draw();
+    const map = this.world.create_();
     this._canvas.append(map);
   }
 
-  update() {
+  update_() {
     for (const g of Object.values(this._ghosts)) {
-      if (g.xVirt == this._player.xVirt && g.yVirt == this._player.yVirt) {
+      if (g.xVirt == this.player.xVirt && g.yVirt == this.player.yVirt) {
         this.restart();
       }
     }
@@ -92,48 +93,40 @@ export class Game {
     if (!settings.freezeGhosts) this.moveGhosts();
     this.movePlayer();
 
-    this.draw();
+    this.draw_();
   }
 
-  callEvent(event) {
-    if (!event) return;
-    if (event === EVENTS.ATE_FOOD) this.updateScore();
-  }
-
-  updateScore() {
-    this._score += this._scorePerFood;
-    this._scoreDiv.textContent = `${this._score}`;
+  draw_() {
+    for (const g of Object.values(this._ghosts)) {
+      g.draw_();
+    }
+    this.player.draw_();
   }
 
   movePlayer() {
-    const vec = directionToVector(this._player.direction);
+    const vec = directionToVector(this.player.direction);
     if (!vec) return;
 
-    const availableDirections = this.playerCanGo();
-    if (!availableDirections[this._player.direction]) {
-      this._player._direction = null;
-      return;
-    }
-
     const now = Date.now();
-    const diff = now - this._player._lastMove;
-    const pxPerMove = 5;
-    if (diff < 2) return;
+    const deltaT = (now - this.player.lastMoved) / 1000;
 
-    const distance = pxPerMove / diff;
-    this._player._xVel = vec.x * distance;
-    this._player._yVel = vec.y * distance;
+    const distance = this.player._speed * deltaT;
+    this.player.lastMoved = now;
 
-    this._player.x += this._player._xVel;
-    this._player.y += this._player._yVel;
+    if (!this.isPlayerAbleToGo(this.player.direction)) return;
 
-    this.player._lastMove = now;
+    this.player.xVel = vec.x * distance;
+    this.player.yVel = vec.y * distance;
+    this.player.x += this.player.xVel;
+    this.player.y += this.player.yVel;
 
-    const tile = this._world.tiles.get(
-      `${this._player.yVirt}-${this._player.xVirt}`
+    const tile = this.world.tiles.get(
+      `${this.player.yVirt}-${this.player.xVirt}`
     );
 
-    if (tile?.onCollide) this.callEvent(tile.onCollide());
+    if (tile) {
+      tile.onCollide();
+    }
   }
 
   moveGhosts() {
@@ -143,11 +136,11 @@ export class Game {
   }
 
   async moveGhost(ghost) {
-    ghost.x += ghost.xv;
-    ghost.y += ghost.yv;
+    ghost.x += ghost.xVel;
+    ghost.y += ghost.yVel;
 
-    if (ghost.xv !== 0 && ghost.x % BLOCK_WIDTH) return;
-    if (ghost.yv !== 0 && ghost.y % BLOCK_HEIGHT) return;
+    if (ghost.xVel !== 0 && ghost.x % BLOCK_WIDTH) return;
+    if (ghost.yVel !== 0 && ghost.y % BLOCK_HEIGHT) return;
 
     const availableDirections = this.ghostCanGo(ghost);
 
@@ -162,18 +155,16 @@ export class Game {
       let currentDir = ghost.direction;
 
       let bestDir = null;
-      while (!bestDir) {
-        if (availableDirections.includes(nextDirection[currentDir])) {
-          bestDir = nextDirection[currentDir];
-        } else {
-          currentDir = nextDirection[currentDir];
-        }
-      }
+      // while (!bestDir) {
+      //   if (availableDirections.includes(nextDirection[currentDir])) {
+      //     bestDir = nextDirection[currentDir];
+      //   } else {
+      //     currentDir = nextDirection[currentDir];
+      //   }
+      // }
 
-      if (bestDir) {
-        return ghost.move(bestDir);
-      }
-      return ghost.stop();
+      if (!bestDir) return ghost.stop();
+      ghost.move(bestDir);
     }
 
     const vectorCache = [];
@@ -187,148 +178,107 @@ export class Game {
     });
 
     const shortestIndex = shortestVectorIndex(vectors);
-
-    if (settings.debugMode) {
-      ghost.setTargetTile(
-        vectorCache[shortestIndex].ax,
-        vectorCache[shortestIndex].ay
-      );
-    }
+    ghost._targetX = vectorCache[shortestIndex].ax;
+    ghost._targetY = vectorCache[shortestIndex].ay;
 
     const direction = availableDirections[shortestIndex];
 
     ghost.move(direction);
   }
 
-  ghostCanGo(ghost) {
+  ghostCanGo(ghost, direction) {
     const directions = [];
 
-    for (const dir of Object.values(DIRECTIONS)) {
+    const availableDirections = this.getAvailableDirections(
+      ghost.xVirt,
+      ghost.yVirt
+    );
+
+    for (const dir of Object.keys(availableDirections)) {
       const v = directionToVector(dir);
       const x = ghost.xVirt + v.x;
       const y = ghost.yVirt + v.y;
 
-      const tile = this._world.getTile(x, y);
-      if (!tile) return [];
+      const tile = this.world.getTile(x, y);
+      if (!tile) continue;
 
       if (
-        (this._world.isInBounds(x, y) && tile._type == TILES.WALL) ||
-        (tile._type === TILES.BARRIER && !ghost._inTheHouse)
+        (this.world.isInBounds(x, y) && tile._type == TILE.WALL) ||
+        (tile._type === TILE.BARRIER && !ghost._inTheHouse)
       )
         continue;
 
       directions.push(dir);
     }
 
-    if (
-      directions.length > 1 &&
-      directions.includes(ghost.oppositeDirection())
-    ) {
-      return directions.filter((dir) => dir !== ghost.oppositeDirection());
-    }
-
-    return directions;
+    const opp = ghost.oppositeDirection();
+    return directions.filter((dir) => dir !== opp);
   }
 
-  draw() {
-    this.drawGhosts();
-    this.drawPlayer();
-  }
-
-  drawGhosts() {
-    for (const g of Object.values(this._ghosts)) {
-      g.draw();
-    }
-  }
-
-  drawPlayer() {
-    this._player.draw();
-  }
-
-  playerCanGo() {
-    const directions = {};
-
-    const xVirt = this.player.xVirt;
-    const yVirt = this.player.yVirt;
-
+  getAvailableDirections(x, y) {
     const tilesAround = [
-      { x: xVirt - 1, y: yVirt, dir: DIRECTIONS.LEFT },
-      { x: xVirt + 1, y: yVirt, dir: DIRECTIONS.RIGHT },
-      { x: xVirt, y: yVirt - 1, dir: DIRECTIONS.UP },
-      { x: xVirt, y: yVirt + 1, dir: DIRECTIONS.DOWN },
+      { x: x - 1, y, dir: DIRECTIONS.LEFT },
+      { x: x + 1, y, dir: DIRECTIONS.RIGHT },
+      { x, y: y - 1, dir: DIRECTIONS.UP },
+      { x, y: y + 1, dir: DIRECTIONS.DOWN },
     ];
 
-    for (const tile of tilesAround) {
-      const tileFree = this._world.tileIsFree(tile.x, tile.y);
+    return tilesAround.reduce((acc, tile) => {
+      if (this.world.tileIsFree(tile.x, tile.y)) acc[tile.dir] = true;
+      return acc;
+    }, {});
+  }
 
-      if (tileFree) directions[tile.dir] = true;
-    }
-
-    return directions;
+  isPlayerAbleToGo(direction) {
+    return (
+      direction in
+      this.getAvailableDirections(this.player.xVirt, this.player.yVirt)
+    );
   }
 
   spawnPlayer() {
-    this._player = new Player(270, 420);
-    this._canvas.appendChild(this._player.div);
+    this.player = new Player(270, 420);
+    this.player.create_();
+    this._canvas.appendChild(this.player.el);
   }
 
   spawnGhosts() {
     const b = new Blinky(390, 420);
-    this._ghosts[b._id] = b;
+    this._ghosts[b.id] = b;
 
     const i = new Inky(420, 420);
-    this._ghosts[i._id] = i;
+    this._ghosts[i.id] = i;
 
     const p = new Pinky(390, 450);
-    this._ghosts[p._id] = p;
+    this._ghosts[p.id] = p;
 
     const c = new Clyde(420, 450);
-    this._ghosts[c._id] = c;
+    this._ghosts[c.id] = c;
 
+    for (const g of Object.values(this._ghosts)) {
+      g.create_();
+      this._canvas.appendChild(g.el);
+    }
+  }
+
+  toggleDebugModeForObject_(o) {
     if (settings.debugMode) {
-      this.createTargetTilesForGhosts();
+      return o.debugEnable_();
     }
 
-    for (const g of Object.values(this._ghosts)) {
-      this._canvas.appendChild(g.div);
-    }
-  }
-
-  getOrCreateGameContainer(elementId) {
-    let el = document.getElementById(elementId);
-
-    if (!el) {
-      el = document.createElement("div");
-      el.id = elementId;
-      this._gameArea.appendChild(el);
-    }
-
-    return el;
-  }
-
-  createTargetTilesForGhosts() {
-    for (const g of Object.values(this._ghosts)) {
-      this._canvas.appendChild(g.createTargetTile());
-    }
+    o.debugDisable_();
+    return [];
   }
 
   toggleDebugMode() {
-    if (settings.debugMode) {
-      for (const g of Object.values(this._ghosts)) {
-        g.removeTargetTile();
-      }
-      return toggleSetting("debugMode");
+    const elements = [];
+    elements.push(...this.toggleDebugModeForObject_(this.player));
+    for (const g of Object.values(this._ghosts)) {
+      elements.push(...this.toggleDebugModeForObject_(g));
     }
 
-    this.createTargetTilesForGhosts();
-    toggleSetting("debugMode");
-  }
-
-  get player() {
-    return this._player;
-  }
-
-  get world() {
-    return this._world;
+    for (const e of elements) {
+      this._canvas.appendChild(e);
+    }
   }
 }

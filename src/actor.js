@@ -1,83 +1,70 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./constants.js";
+import {
+  BLOCK_WIDTH,
+  BLOCK_HEIGHT,
+  DIRECTIONS,
+  directionToString,
+} from "./constants.js";
+import { GameObject } from "./game-object.js";
 
-export class Actor {
-  constructor(
-    x = BLOCK_WIDTH,
-    y = BLOCK_WIDTH,
-    width = BLOCK_WIDTH,
-    height = BLOCK_HEIGHT
-  ) {
-    this._x = x;
-    this._y = y;
-    this._xVel = 0;
-    this._yVel = 0;
-    this._width = width;
-    this._height = height;
+export class Actor extends GameObject {
+  constructor(x = 0, y = 0, width = BLOCK_WIDTH, height = BLOCK_HEIGHT) {
+    super();
 
-    this._lastMove = Date.now();
-    this._direction = null;
+    this.x_ = x;
+    this.y_ = y;
+    this.xVel = 0;
+    this.yVel = 0;
 
-    this._div = null;
+    this.lastMoved = Date.now();
+    this.direction = null;
+
+    this.width = width;
+    this.height = height;
+
+    this.create_();
   }
 
-  draw() {
-    this.div.style.top = `${this.y}px`;
-    this.div.style.left = `${this.x}px`;
+  update() {
+    this.el.style.top = `${this.y}px`;
+    this.el.style.left = `${this.x}px`;
+
+    if (this.direction != null) {
+      this.el.className = this.el.className
+        .split(" ")
+        .filter((c) => !c.startsWith("walk-"))
+        .join(" ");
+      this.el.classList.add(`walk-${directionToString(this.direction)}`);
+    }
   }
 
   get x() {
-    return this._x;
+    return this.x_;
   }
+
   set x(value) {
-    this._x = value;
+    this.x_ = Math.round(value);
   }
+
   get y() {
-    return this._y;
+    return this.y_;
   }
+
   set y(value) {
-    this._y = value;
-  }
-
-  get xv() {
-    return this._xVel;
-  }
-  set xv(value) {
-    this._xVel = value;
-  }
-  get yv() {
-    return this._yVel;
-  }
-  set yv(value) {
-    this._yVel = value;
-  }
-
-  get direction() {
-    return this._direction;
-  }
-  set direction(value) {
-    this._direction = value;
+    this.y_ = Math.round(value);
   }
 
   get xVirt() {
-    return Math.floor(this._x / BLOCK_WIDTH);
+    const rvx = this.x_ / BLOCK_WIDTH;
+    if (this.direction == DIRECTIONS.RIGHT) return Math.floor(rvx);
+    else if (this.direction == DIRECTIONS.LEFT) return Math.ceil(rvx);
+    this.x_ = Math.round(rvx) * BLOCK_WIDTH;
+    return Math.round(rvx);
   }
   get yVirt() {
-    return Math.floor(this._y / BLOCK_WIDTH);
-  }
-
-  get div() {
-    return this._div;
-  }
-  get top() {
-    return this._x;
-  }
-  get right() {
-    return this._y + this._width;
-  }
-  get bottom() {
-    return this._x + this._height;
-  }
-  get left() {
-    return this._y;
+    const rvy = this.y_ / BLOCK_HEIGHT;
+    if (this.direction == DIRECTIONS.DOWN) return Math.floor(rvy);
+    else if (this.direction == DIRECTIONS.UP) return Math.ceil(rvy);
+    this.y_ = Math.round(rvy) * BLOCK_HEIGHT;
+    return Math.round(rvy);
   }
 }

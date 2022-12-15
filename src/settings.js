@@ -19,7 +19,7 @@ export const events = {
 
 export const settings = {
   gamePaused: false,
-  debugMode: false,
+  debugMode: true,
   godMode: false,
   onePunchMode: false,
   noChaseMode: false,

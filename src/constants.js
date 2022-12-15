@@ -41,9 +41,3 @@ export function directionToString(direction) {
 export function directionToVector(direction) {
   return DIRECTION_TO_VECTOR[direction] ?? { x: 0, y: 0 };
 }
-
-export function validDirection(direction) {
-  return typeof direction === "number"
-    ? direction > 0 && direction <= 4
-    : DIRECTIONS[direction] !== undefined;
-}

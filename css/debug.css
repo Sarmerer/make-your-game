@@ -1,0 +1,50 @@
+.player-virt-pos {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+
+.player-virt-pos::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  background-color: yellow;
+}
+
+.ghost-target {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+
+.ghost-target::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.ghost-target.pinky::after {
+  background-color: pink;
+}
+
+.ghost-target.inky::after {
+  background-color: cyan;
+}
+
+.ghost-target.blinky::after {
+  background-color: red;
+}
+
+.ghost-target.clyde::after {
+  background-color: orange;
+}

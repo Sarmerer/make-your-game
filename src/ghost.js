@@ -13,30 +13,39 @@ import {
 export class Ghost extends Actor {
   constructor(x = 90, y = 90, id = "ghost") {
     super(x, y);
-    this._id = id;
+    this.id = id;
     this._speed = SPEED;
-    this._div = NewHTMLElement("div", {
-      id: id,
-      style: {
-        width: `${this._width}px`,
-        height: `${this._height}px`,
-        position: "absolute",
-        zIndex: 999,
-      },
-    });
 
-    this._targetTile = null;
+    this._targetX = 0;
+    this._targetY = 0;
     this._scatterMode = true;
     this._inTheHouse = true;
     this._scatterModeTimestamp = Date.now();
 
-    this._animation = new Image(30, 30);
-    this._animation.src = "./assets/pacman.png";
-    this._div.appendChild(this._animation);
-  }
+    this.elProps = {
+      id: id,
+      classList: ["ghost"],
+      style: {
+        width: `${this.width}px`,
+        height: `${this.height}px`,
+        position: "absolute",
+        zIndex: 999,
+      },
+    };
 
-  get targetTile() {
-    return this._targetTile;
+    this.debuggers = [
+      {
+        name: "target",
+        handler: this.debugTargetTile,
+        element: {
+          classList: ["ghost-target", this.id],
+          style: {
+            top: "0px",
+            left: "0px",
+          },
+        },
+      },
+    ];
   }
 
   get scatterMode() {
@@ -47,40 +56,27 @@ export class Ghost extends Actor {
     this._scatterMode = !!scatterMode;
   }
 
-  createTargetTile() {
-    this._targetTile = NewHTMLElement("div", {
-      class: ["ghost-target", this._id],
-      style: {
-        top: "0px",
-        left: "0px",
-      },
-    });
-    return this._targetTile;
-  }
-
-  removeTargetTile() {
-    this._targetTile.remove();
-    this._targetTile = null;
+  debugTargetTile(element) {
+    element.style.left = `${this._targetX * BLOCK_HEIGHT}px`;
+    element.style.top = `${this._targetY * BLOCK_WIDTH}px`;
   }
 
   move(direction) {
-    this._direction = direction;
+    this.direction = direction;
 
-    const vector = directionToVector(this._direction);
-
-    this._yVel = vector.y * this._speed;
-    this._xVel = vector.x * this._speed;
-    this._div.className = `walk-${directionToString(this._direction)}`;
+    const vector = directionToVector(this.direction);
+    this.yVel = vector.y * this._speed;
+    this.xVel = vector.x * this._speed;
   }
 
   oppositeDirection() {
-    return DIRECTIONS_OPPOSITE[this._direction];
+    return DIRECTIONS_OPPOSITE[this.direction];
   }
 
   stop() {
-    this._direction = null;
-    this._xVel = 0;
-    this._yVel = 0;
+    this.direction = null;
+    this.xVel = 0;
+    this.yVel = 0;
   }
 
   currentBehavior() {
@@ -123,11 +119,6 @@ export class Ghost extends Actor {
       this._scatterMode = false;
       this._scatterModeTimestamp = d;
     }
-  }
-
-  setTargetTile(x, y) {
-    this._targetTile.style.left = `${x * BLOCK_HEIGHT}px`;
-    this._targetTile.style.top = `${y * BLOCK_WIDTH}px`;
   }
 }
 

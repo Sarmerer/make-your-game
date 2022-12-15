@@ -1,0 +1,121 @@
+#player::after,
+.ghost::after {
+  content: "";
+  height: 30px;
+  width: 30px;
+  display: block;
+  background-image: url(../assets/pacman.png);
+  background-size: 1700% 1100%;
+}
+
+#player::after {
+  background-position: -80px -1px;
+}
+
+#player.animate::after {
+  animation: player-walk 0.3s steps(3) infinite;
+}
+
+#player.walk-up::after {
+  transform: rotate(-90deg);
+}
+
+#player.walk-down::after {
+  transform: rotate(90deg);
+}
+
+#player.walk-left::after {
+  transform: rotate(180deg);
+}
+
+#player.walk-right::after {
+  transform: rotate(0deg);
+}
+
+@keyframes player-walk {
+  from {
+    background-position-x: -9px;
+  }
+  to {
+    background-position-x: -117px;
+  }
+}
+
+#player.die::after {
+  animation: player-die 1.7s steps(11);
+  background-position-x: -475px;
+  transform: rotate(0deg);
+}
+@keyframes player-die {
+  from {
+    background-position-x: -117px;
+  }
+  to {
+    background-position-x: -510px;
+  }
+}
+
+#blinky::after {
+  background-position-y: -135px;
+}
+
+#pinky::after {
+  background-position-y: -168px;
+}
+
+#inky::after {
+  background-position-y: -201px;
+}
+
+#clyde::after {
+  background-position-y: -234px;
+}
+
+.ghost::after {
+  background-position-x: -10px;
+}
+
+.ghost.walk-right::after {
+  animation: ghost-walk-right 0.7s steps(2) infinite;
+}
+@keyframes ghost-walk-right {
+  from {
+    background-position-x: -10px;
+  }
+  to {
+    background-position-x: -83px;
+  }
+}
+.ghost.walk-left::after {
+  animation: ghost-walk-left 0.7s steps(2) infinite;
+}
+@keyframes ghost-walk-left {
+  from {
+    background-position-x: -81px;
+  }
+  to {
+    background-position-x: -155px;
+  }
+}
+.ghost.walk-up::after {
+  animation: ghost-walk-up 0.7s steps(2) infinite;
+}
+@keyframes ghost-walk-up {
+  from {
+    background-position-x: -153px;
+  }
+  to {
+    background-position-x: -227px;
+  }
+}
+.ghost.walk-down::after {
+  animation: ghost-walk-down 0.7s steps(2) infinite;
+}
+@keyframes ghost-walk-down {
+  from {
+    background-position-x: -225px;
+  }
+  to {
+    background-position-x: -299px;
+  }
+}
