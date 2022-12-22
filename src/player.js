@@ -1,3 +1,4 @@
+import { BLOCK_HEIGHT, BLOCK_WIDTH } from "./settings.js";
 import { Actor } from "./actor.js";
 import { Tile } from "./tile.js";
 
@@ -12,7 +13,6 @@ export class Player extends Actor {
       style: {
         width: `${this.width}px`,
         height: `${this.height}px`,
-        position: "absolute",
       },
     };
   }
@@ -50,14 +50,14 @@ export class Player extends Actor {
       {
         name: "virt-pos",
         handler: (element) => {
-          element.style.left = `${this.x}px`;
-          element.style.top = `${this.y}px`;
+          element.style.left = `${this.xVirt * BLOCK_WIDTH}px`;
+          element.style.top = `${this.yVirt * BLOCK_HEIGHT}px`;
         },
         element: {
           classList: ["player-virt-pos"],
           style: {
-            top: `${this.x}px`,
-            left: `${this.y}px`,
+            top: `${this.xVirt * BLOCK_WIDTH}px`,
+            left: `${this.yVirt * BLOCK_HEIGHT}px`,
           },
         },
       },

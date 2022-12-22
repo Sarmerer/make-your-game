@@ -17,6 +17,7 @@ body {
 
 #canvas {
   position: relative;
+  user-select: none;
 }
 
 .tile {
@@ -68,10 +69,6 @@ body {
 
 #player,
 .ghost {
-  overflow: hidden;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  box-sizing: border-box;
-  z-index: 1;
+  position: absolute;
+  z-index: 2;
 }

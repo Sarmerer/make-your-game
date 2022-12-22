@@ -24,7 +24,6 @@ export class Ghost extends Actor {
       style: {
         width: `${this.width}px`,
         height: `${this.height}px`,
-        position: "absolute",
       },
     };
   }
