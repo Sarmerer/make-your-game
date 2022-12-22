@@ -2,6 +2,8 @@ import { NewHTMLElement } from "./utils.js";
 
 export class GameObject {
   constructor() {
+    this.tags = [];
+
     this.el = null;
     this.didFirstDraw = false;
 
@@ -11,8 +13,11 @@ export class GameObject {
     this.HTMLType = "div";
     this.elProps = {};
 
-    this.debuggers = {};
     this.activeDebuggers_ = {};
+  }
+
+  addTag(tag) {
+    this.tags.push(tag);
   }
 
   setStatic(isStatic) {
@@ -40,22 +45,35 @@ export class GameObject {
     if (this.immediateDraw) {
       this.draw_();
     }
+
+    return this.el;
   }
 
   draw_() {
-    if (this.static && this.didFirstDraw) return;
-    this.update();
-
     for (const debugEntry of Object.values(this.activeDebuggers_)) {
       debugEntry.handler(debugEntry.element);
     }
+  }
+
+  draw() {
+    this.draw_();
   }
 
   beforeCreated() {}
 
   created() {}
 
-  update() {}
+  update(game) {}
+
+  destroy_() {
+    this.beforeDestroyed();
+    if (this.el) this.el.remove();
+    this.destroyed();
+  }
+
+  beforeDestroyed() {}
+
+  destroyed() {}
 
   addDebugger_(name, handler, element) {
     if (this.activeDebuggers_[name]) return null;
@@ -97,4 +115,8 @@ export class GameObject {
   debugEnabled(name) {}
 
   debugDisabled(name) {}
+
+  get debuggers() {
+    return [];
+  }
 }

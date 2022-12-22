@@ -1,3 +1,6 @@
+export const BLOCK_WIDTH = 30;
+export const BLOCK_HEIGHT = 30;
+
 export const keyBindings = [
   { action: "left", keys: ["arrowleft", "a"] },
   { action: "right", keys: ["arrowright", "d"] },

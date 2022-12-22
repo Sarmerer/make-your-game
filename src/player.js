@@ -1,16 +1,11 @@
-import {
-  PLAYER_SPEED as SPEED,
-  directionToString,
-  BLOCK_WIDTH,
-  BLOCK_HEIGHT,
-} from "./constants.js";
-import { NewHTMLElement } from "./utils.js";
 import { Actor } from "./actor.js";
+import { Tile } from "./tile.js";
 
 export class Player extends Actor {
   constructor(x, y) {
     super(x, y);
-    this._speed = 80;
+    this.tags = ["player"];
+    this.speed = 200;
 
     this.elProps = {
       id: "player",
@@ -19,31 +14,51 @@ export class Player extends Actor {
         width: `${this.width}px`,
         height: `${this.height}px`,
         position: "absolute",
-        zIndex: 999,
       },
     };
+  }
 
-    this.debuggers = [
+  update(game) {
+    const now = Date.now();
+    const deltaT = (now - this.lastMoved) / 1000;
+
+    this.lastMoved = now;
+    const distance = this.speed * deltaT;
+    const available = this.getAvailableDirections(game.world);
+    if (!this.direction.isAvailableWithin(available)) return;
+
+    this.xVel = this.direction.x * distance;
+    this.yVel = this.direction.y * distance;
+    this.x += this.xVel;
+    this.y += this.yVel;
+
+    const tile = game.world.tiles.get(`${this.yVirt}-${this.xVirt}`);
+
+    if (tile) {
+      tile.onCollide();
+    }
+  }
+
+  get blockedBy() {
+    return [Tile.WALL, Tile.BARRIER];
+  }
+
+  get debuggers() {
+    return [
       {
         name: "virt-pos",
-        handler: this.debugVirtPos,
+        handler: (element) => {
+          element.style.left = `${this.x}px`;
+          element.style.top = `${this.y}px`;
+        },
         element: {
           classList: ["player-virt-pos"],
           style: {
-            top: `${this.xVirt * BLOCK_WIDTH}px`,
-            left: `${this.yVirt * BLOCK_HEIGHT}px`,
+            top: `${this.x}px`,
+            left: `${this.y}px`,
           },
         },
       },
     ];
-  }
-
-  redirect(dir) {
-    this.direction = dir;
-  }
-
-  debugVirtPos(element) {
-    element.style.left = `${this.xVirt * BLOCK_WIDTH}px`;
-    element.style.top = `${this.yVirt * BLOCK_HEIGHT}px`;
   }
 }

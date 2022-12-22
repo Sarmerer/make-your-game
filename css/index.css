@@ -30,6 +30,15 @@ body {
   border: 1px solid blue;
 }
 
+/* .wall::after {
+  content: "";
+  display: block;
+  width: 30px;
+  height: 30px;
+  background-image: url(../assets//tiles.webp);
+  background-position: -225px -33px;
+} */
+
 .food,
 .pill {
   display: flex;
@@ -53,11 +62,6 @@ body {
   border-radius: 4px;
 }
 
-#score {
-  color: white;
-  height: 20px;
-}
-
 .game-map {
   display: grid;
 }
@@ -69,4 +73,5 @@ body {
   pointer-events: none;
   user-select: none;
   box-sizing: border-box;
+  z-index: 1;
 }

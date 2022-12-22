@@ -1,22 +1,23 @@
 import { Controller } from "./controller/index.js";
-import { DIRECTIONS, directionToString } from "./constants.js";
 import { Game } from "./game.js";
 import { events, settings, toggleSetting } from "./settings.js";
+import { Direction } from "./direction.js";
+import { Player } from "./player.js";
 
-/**
- * @type {Game}
- */
+/** @type {Game} */
 let game;
 
-/**
- * @type {Controller}
- */
+/** @type {Controller} */
 let controller;
+
+/** @type {Player} */
+let player;
 
 window.onload = function () {
   game = new Game();
   game.create_();
 
+  player = game.getObjectByTag("player");
   controller = new Controller();
 
   window.addEventListener("keydown", listenKey);
@@ -80,18 +81,27 @@ function resume() {
   start();
 }
 
-function loop() {
-  const dirs = Object.values(DIRECTIONS);
+const directions = [
+  Direction.Up(),
+  Direction.Right(),
+  Direction.Down(),
+  Direction.Left(),
+];
 
-  for (let dir of dirs) {
-    const dirStr = directionToString(dir);
+function loop() {
+  for (let dir of directions) {
+    const dirStr = dir.toString();
     if (!controller.isKeyDown(dirStr)) continue;
 
-    if (game.isPlayerAbleToGo(dir)) game.player.redirect(dir);
-    else controller.setQueue(dirStr);
+    if (dir.isAvailableWithin(player.getAvailableDirections(game.world))) {
+      player.direction.change(dir);
+    } else {
+      controller.setQueue(dirStr);
+    }
   }
 
-  game.update_();
+  game.update();
+  game.draw();
 
   if (!settings.gamePaused) window.requestAnimationFrame(loop);
 }

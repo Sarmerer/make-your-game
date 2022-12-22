@@ -1,36 +1,30 @@
-import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./constants.js";
+import { BLOCK_WIDTH, BLOCK_HEIGHT } from "./settings.js";
 import { GameObject } from "./game-object.js";
 
-export const TILE = {
-  FLOOR: "_",
-  WALL: "|",
-  FOOD: ".",
-  PILL: "o",
-  BARRIER: "-",
-  PORTAL: "0",
-};
-
-export const TILE_CSS_CLASS = {
-  [TILE.FLOOR]: "floor",
-  [TILE.WALL]: "wall",
-  [TILE.FOOD]: "food",
-  [TILE.PILL]: "pill",
-  [TILE.BARRIER]: "barrier",
-  [TILE.PORTAL]: "portal",
-};
-
-export function getTile(tile) {
-  return Object.values(TILE).find((t) => t === tile) || TILE.FLOOR;
-}
-
 export class Tile extends GameObject {
-  constructor(type = TILE.FLOOR) {
+  static FLOOR = "_";
+  static WALL = "|";
+  static FOOD = ".";
+  static PILL = "o";
+  static BARRIER = "-";
+  static PORTAL = "0";
+
+  static CSS_CLASS = {
+    [Tile.FLOOR]: "floor",
+    [Tile.WALL]: "wall",
+    [Tile.FOOD]: "food",
+    [Tile.PILL]: "pill",
+    [Tile.BARRIER]: "barrier",
+    [Tile.PORTAL]: "portal",
+  };
+
+  constructor(type = Tile.FLOOR) {
     super();
 
-    this.type = getTile(type);
+    this.type = type;
 
     this.elProps = {
-      classList: ["tile", TILE_CSS_CLASS[this.type]],
+      classList: ["tile", Tile.CSS_CLASS[this.type]],
       style: {
         width: `${BLOCK_WIDTH}px`,
         height: `${BLOCK_HEIGHT}px`,
@@ -39,6 +33,6 @@ export class Tile extends GameObject {
   }
 
   onCollide() {
-    this.el.classList.remove(TILE_CSS_CLASS[this.type]);
+    this.el.classList.remove(Tile.CSS_CLASS[this.type]);
   }
 }
