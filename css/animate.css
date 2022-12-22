@@ -12,23 +12,23 @@
   background-position: -80px -1px;
 }
 
-#player.animate::after {
+#player.walk::after {
   animation: player-walk 0.3s steps(3) infinite;
 }
 
-#player.walk-up::after {
+#player[data-animation="up"]::after {
   transform: rotate(-90deg);
 }
 
-#player.walk-down::after {
+#player[data-animation="down"]::after {
   transform: rotate(90deg);
 }
 
-#player.walk-left::after {
+#player[data-animation="left"]::after {
   transform: rotate(180deg);
 }
 
-#player.walk-right::after {
+#player[data-animation="right"]::after {
   transform: rotate(0deg);
 }
 
@@ -75,29 +75,7 @@
   background-position-x: -10px;
 }
 
-.ghost.walk-right::after {
-  animation: ghost-walk-right 0.7s steps(2) infinite;
-}
-@keyframes ghost-walk-right {
-  from {
-    background-position-x: -10px;
-  }
-  to {
-    background-position-x: -83px;
-  }
-}
-.ghost.walk-left::after {
-  animation: ghost-walk-left 0.7s steps(2) infinite;
-}
-@keyframes ghost-walk-left {
-  from {
-    background-position-x: -81px;
-  }
-  to {
-    background-position-x: -155px;
-  }
-}
-.ghost.walk-up::after {
+.ghost[data-animation="up"]::after {
   animation: ghost-walk-up 0.7s steps(2) infinite;
 }
 @keyframes ghost-walk-up {
@@ -108,7 +86,7 @@
     background-position-x: -227px;
   }
 }
-.ghost.walk-down::after {
+.ghost[data-animation="down"]::after {
   animation: ghost-walk-down 0.7s steps(2) infinite;
 }
 @keyframes ghost-walk-down {
@@ -117,5 +95,27 @@
   }
   to {
     background-position-x: -299px;
+  }
+}
+.ghost[data-animation="left"]:after {
+  animation: ghost-walk-left 0.7s steps(2) infinite;
+}
+@keyframes ghost-walk-left {
+  from {
+    background-position-x: -81px;
+  }
+  to {
+    background-position-x: -155px;
+  }
+}
+.ghost[data-animation="right"]::after {
+  animation: ghost-walk-right 0.7s steps(2) infinite;
+}
+@keyframes ghost-walk-right {
+  from {
+    background-position-x: -10px;
+  }
+  to {
+    background-position-x: -83px;
   }
 }

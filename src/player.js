@@ -9,7 +9,6 @@ export class Player extends Actor {
 
     this.elProps = {
       id: "player",
-      classList: ["animate"],
       style: {
         width: `${this.width}px`,
         height: `${this.height}px`,
@@ -25,7 +24,10 @@ export class Player extends Actor {
     this.lastMoved = now;
     const distance = this.speed * deltaT;
     const available = this.getAvailableDirections(game.world);
-    if (!this.direction.isAvailableWithin(available)) return;
+    if (!this.direction.isAvailableWithin(available)) {
+      this.direction.change(null);
+      return;
+    }
 
     this.xVel = this.direction.x * distance;
     this.yVel = this.direction.y * distance;

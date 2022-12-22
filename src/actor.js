@@ -22,6 +22,14 @@ export class Actor extends GameObject {
     this.el.style.top = `${this.y}px`;
     this.el.style.left = `${this.x}px`;
 
+    const animation = this.direction.toString();
+    delete this.el.dataset.animation;
+    this.el.classList.remove("walk");
+    if (animation) {
+      this.el.classList.add("walk");
+      this.el.dataset.animation = animation;
+    }
+
     this.draw_();
   }
 
